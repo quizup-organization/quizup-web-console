@@ -17,7 +17,10 @@ import { Label } from "@/components/ui/label"
 import { formatDateTime, formatPosition } from "@/lib/format"
 import { ErrorState, LoadingState } from "@/shared/components/DataState"
 import { Modal } from "@/shared/components/Modal"
+import { RangeSelector, type MetricsRange } from "@/shared/components/RangeSelector"
+import { TimeSeriesChart } from "@/shared/components/TimeSeriesChart"
 import { useProcessorActions } from "../hooks/useProcessorActions"
+import { useProcessorMetrics } from "../hooks/useProcessorMetrics"
 import { useProcessorDetail } from "../hooks/useProcessors"
 
 type ResetPosition = "TAIL" | "HEAD" | "INSTANT"
@@ -38,6 +41,8 @@ export function ProcessorDetailPage() {
     name,
   )
   const actions = useProcessorActions(application, instanceId, name)
+  const [range, setRange] = useState<MetricsRange>("1h")
+  const metrics = useProcessorMetrics(application, instanceId, name, range)
   const [resetOpen, setResetOpen] = useState(false)
   const [position, setPosition] = useState<ResetPosition>("TAIL")
   const [instant, setInstant] = useState("")
@@ -147,8 +152,62 @@ export function ProcessorDetailPage() {
             <p className="text-muted-foreground">Dernière remontée</p>
             <p>{formatDateTime(processor.updatedAt)}</p>
           </div>
+          <div>
+            <p className="text-muted-foreground">Token store</p>
+            <p className="truncate font-mono text-xs" title={processor.tokenStoreIdentifier ?? undefined}>
+              {processor.tokenStoreIdentifier ?? "—"}
+            </p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">Segments / capacité / threads</p>
+            <p>
+              {segments.length} / {processor.capacity || "—"} / {processor.activeThreads}
+            </p>
+          </div>
+          {processor.warnings.length > 0 ? (
+            <div className="sm:col-span-2 lg:col-span-4">
+              <p className="text-muted-foreground">Warnings</p>
+              <div className="mt-1 flex flex-wrap gap-1">
+                {processor.warnings.map((warning) => (
+                  <Badge key={warning} variant="destructive">
+                    {warning}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium">Métriques</h2>
+          <RangeSelector value={range} onChange={setRange} />
+        </div>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <TimeSeriesChart
+            title="Événements traités (par résultat)"
+            result={metrics.data?.processed}
+            unit="/s"
+          />
+          <TimeSeriesChart
+            title="Durée de traitement p90"
+            result={metrics.data?.durationP90}
+            labelKey="__none"
+            unit="s"
+          />
+          <TimeSeriesChart
+            title="Dead-letter queue (messages)"
+            result={metrics.data?.dlqSize}
+            labelKey="__none"
+          />
+          <TimeSeriesChart
+            title="À jour / replay (1 = oui)"
+            result={metrics.data?.caughtUp}
+            labelKey="__none"
+          />
+        </div>
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-border bg-background">
         <table className="w-full text-sm">
@@ -172,7 +231,7 @@ export function ProcessorDetailPage() {
               segments.map((segment) => (
                 <tr key={segment.segmentId}>
                   <td className="px-4 py-2 font-mono text-xs">
-                    {segment.segmentId} (mask {segment.mask})
+                    {segment.segmentId} (mask {segment.mask}, {segment.onePartOf} segment(s))
                   </td>
                   <td className="px-4 py-2 text-xs">
                     <div>courante : {formatPosition(segment.currentPosition)}</div>

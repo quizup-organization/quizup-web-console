@@ -5,3 +5,8 @@ export const ApplicationsPage = lazy(() =>
     default: module.ApplicationsPage,
   })),
 )
+export const ApplicationDetailPage = lazy(() =>
+  import("./pages/ApplicationDetailPage").then((module) => ({
+    default: module.ApplicationDetailPage,
+  })),
+)

@@ -1,11 +1,17 @@
 import { NavLink, Outlet } from "react-router-dom"
 import {
   Activity,
+  CalendarClock,
+  Gauge,
   Inbox,
   LayoutList,
   LogOut,
+  MessagesSquare,
   ScrollText,
+  Search,
   ServerCog,
+  Terminal,
+  Users,
   type LucideIcon,
 } from "lucide-react"
 
@@ -21,9 +27,15 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
+  { to: "/", label: "Dashboard", icon: Gauge },
   { to: "/applications", label: "Applications", icon: LayoutList },
   { to: "/processors", label: "Processors", icon: Activity },
+  { to: "/commands", label: "Commandes", icon: Terminal },
+  { to: "/queries", label: "Queries", icon: MessagesSquare },
+  { to: "/scheduled-events", label: "Scheduled", icon: CalendarClock },
+  { to: "/search", label: "Recherche", icon: Search },
   { to: "/dlq", label: "Dead Letters", icon: Inbox },
+  { to: "/users", label: "Utilisateurs", icon: Users },
   { to: "/audit", label: "Audit", icon: ScrollText },
 ]
 
@@ -43,6 +55,7 @@ export function AppShell() {
             <NavLink
               key={item.to}
               to={item.to}
+              end={item.to === "/"}
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
@@ -64,15 +77,16 @@ export function AppShell() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b border-border bg-background/95 px-4 backdrop-blur md:px-6">
-          <nav className="flex items-center gap-1 md:hidden">
+          <nav className="flex items-center gap-1 overflow-x-auto md:hidden">
             {NAV.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={item.to === "/"}
                 aria-label={item.label}
                 className={({ isActive }) =>
                   cn(
-                    "grid size-9 place-items-center rounded-md",
+                    "grid size-9 shrink-0 place-items-center rounded-md",
                     isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
                   )
                 }

@@ -5,7 +5,10 @@ const segment = (value: string) => encodeURIComponent(value)
 
 export const ENDPOINTS = {
   console: {
+    dashboard: "/api/console/dashboard",
     applications: "/api/console/applications",
+    application: (application: string) =>
+      `/api/console/applications/${segment(application)}`,
     processors: "/api/console/processors",
     processor: (application: string, instanceId: string, name: string) =>
       `/api/console/processors/${segment(application)}/${segment(instanceId)}/${segment(name)}`,
@@ -13,6 +16,21 @@ export const ENDPOINTS = {
     dlqSequences: (application: string, instanceId: string, processor: string) =>
       `/api/console/dlq/${segment(application)}/${segment(instanceId)}/${segment(processor)}/sequences`,
     audit: "/api/console/audit",
+    users: "/api/console/users",
+    metrics: {
+      application: (application: string) =>
+        `/api/console/metrics/applications/${segment(application)}`,
+      processor: (application: string, instanceId: string, name: string) =>
+        `/api/console/metrics/processors/${segment(application)}/${segment(instanceId)}/${segment(name)}`,
+      messages: (application: string) =>
+        `/api/console/metrics/messages/${segment(application)}`,
+    },
+    search: {
+      events: "/api/console/search/events",
+      eventsByType: "/api/console/search/events/by-type",
+      snapshots: "/api/console/search/snapshots",
+      scheduledEvents: "/api/console/scheduled-events",
+    },
     actions: {
       retryDlqSequence: (
         application: string,

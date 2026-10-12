@@ -1,5 +1,6 @@
 import { api } from "@/lib/api"
 import { ENDPOINTS } from "@/lib/endpoints"
+import type { PrometheusResult } from "@/lib/metrics"
 
 export interface ProcessorView {
   application: string
@@ -10,6 +11,14 @@ export interface ProcessorView {
   error: boolean
   replaying: boolean
   supportsReset: boolean
+  canPause: boolean
+  canPlay: boolean
+  canSplit: boolean
+  canMerge: boolean
+  tokenStoreIdentifier: string | null
+  activeThreads: number
+  capacity: number
+  warnings: string[]
   updatedAt: string
 }
 
@@ -22,6 +31,7 @@ export interface SegmentView {
   errorState: boolean
   currentPosition: number | null
   resetPosition: number | null
+  onePartOf: number
   errorType: string | null
   errorMessage: string | null
 }
@@ -29,6 +39,14 @@ export interface SegmentView {
 export interface ProcessorDetailView {
   processor: ProcessorView
   segments: SegmentView[]
+}
+
+export interface ProcessorMetricsView {
+  processed: PrometheusResult
+  durationP90: PrometheusResult
+  dlqSize: PrometheusResult
+  caughtUp: PrometheusResult
+  replaying: PrometheusResult
 }
 
 export interface ResetPayload {
@@ -48,6 +66,16 @@ export const processorsService = {
   ): Promise<ProcessorDetailView> =>
     api.get<ProcessorDetailView>(
       ENDPOINTS.console.processor(application, instanceId, name),
+    ),
+  metrics: (
+    application: string,
+    instanceId: string,
+    name: string,
+    range: string,
+  ): Promise<ProcessorMetricsView> =>
+    api.get<ProcessorMetricsView>(
+      ENDPOINTS.console.metrics.processor(application, instanceId, name),
+      { params: { range } },
     ),
 }
 

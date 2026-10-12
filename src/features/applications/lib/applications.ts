@@ -10,7 +10,49 @@ export interface InstanceView {
   lastSeen: string
 }
 
+export interface ApplicationDetailView {
+  application: string
+  instances: InstanceView[]
+  handlers: {
+    commands: string[]
+    queries: string[]
+  }
+  processors: Array<{
+    application: string
+    instanceId: string
+    name: string
+    mode: string
+    running: boolean
+    error: boolean
+    replaying: boolean
+    canPause: boolean
+    canPlay: boolean
+    canSplit: boolean
+    canMerge: boolean
+    tokenStoreIdentifier: string | null
+    activeThreads: number
+    capacity: number
+    warnings: string[]
+    updatedAt: string
+    segments: Array<{
+      segmentId: number
+      mask: number
+      caughtUp: boolean
+      replaying: boolean
+      merging: boolean
+      errorState: boolean
+      currentPosition: number | null
+      resetPosition: number | null
+      onePartOf: number
+      errorType: string | null
+      errorMessage: string | null
+    }>
+  }>
+}
+
 export const applicationsService = {
   list: (): Promise<InstanceView[]> =>
     api.get<InstanceView[]>(ENDPOINTS.console.applications),
+  detail: (application: string): Promise<ApplicationDetailView> =>
+    api.get<ApplicationDetailView>(ENDPOINTS.console.application(application)),
 }

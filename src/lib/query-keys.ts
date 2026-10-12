@@ -2,8 +2,13 @@
  * Clés React Query hiérarchiques de la console.
  */
 export const queryKeys = {
+  dashboard: {
+    all: ["console", "dashboard"] as const,
+  },
   applications: {
     all: ["console", "applications"] as const,
+    detail: (application: string) =>
+      ["console", "applications", "detail", application] as const,
   },
   processors: {
     all: ["console", "processors"] as const,
@@ -34,5 +39,31 @@ export const queryKeys = {
   audit: {
     list: (page: number, size: number) =>
       ["console", "audit", page, size] as const,
+  },
+  metrics: {
+    processor: (
+      application: string,
+      instanceId: string,
+      name: string,
+      range: string,
+    ) =>
+      ["console", "metrics", "processor", application, instanceId, name, range] as const,
+    application: (application: string, range: string) =>
+      ["console", "metrics", "application", application, range] as const,
+    messages: (application: string, range: string) =>
+      ["console", "metrics", "messages", application, range] as const,
+  },
+  search: {
+    events: (application: string, aggregateId: string) =>
+      ["console", "search", "events", application, aggregateId] as const,
+    eventsByType: (application: string, type: string) =>
+      ["console", "search", "events-by-type", application, type] as const,
+    snapshots: (application: string, aggregateId: string) =>
+      ["console", "search", "snapshots", application, aggregateId] as const,
+    scheduledEvents: (application: string) =>
+      ["console", "search", "scheduled", application] as const,
+  },
+  users: {
+    all: ["console", "users"] as const,
   },
 } as const
