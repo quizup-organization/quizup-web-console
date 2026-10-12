@@ -1,2 +1,3 @@
+export { useInFlightCommands } from "./hooks/useInFlightCommands"
 export { useMessageMetrics } from "./hooks/useMessageMetrics"
-export type { MessageMetricsView } from "./lib/messages"
+export type { InFlightCommandView, MessageMetricsView } from "./lib/messages"

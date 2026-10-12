@@ -49,6 +49,17 @@ export interface ProcessorMetricsView {
   replaying: PrometheusResult
 }
 
+export interface ProcessorLagView {
+  processor: string
+  tailPosition: number | null
+  maxLag: number | null
+  segments: Array<{
+    segmentId: number
+    currentPosition: number | null
+    lag: number | null
+  }>
+}
+
 export interface ResetPayload {
   position: "TAIL" | "HEAD" | "INSTANT"
   instant?: string
@@ -76,6 +87,14 @@ export const processorsService = {
     api.get<ProcessorMetricsView>(
       ENDPOINTS.console.metrics.processor(application, instanceId, name),
       { params: { range } },
+    ),
+  lag: (
+    application: string,
+    instanceId: string,
+    name: string,
+  ): Promise<ProcessorLagView> =>
+    api.get<ProcessorLagView>(
+      ENDPOINTS.console.processorLag(application, instanceId, name),
     ),
 }
 

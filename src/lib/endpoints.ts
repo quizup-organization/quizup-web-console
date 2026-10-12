@@ -12,6 +12,9 @@ export const ENDPOINTS = {
     processors: "/api/console/processors",
     processor: (application: string, instanceId: string, name: string) =>
       `/api/console/processors/${segment(application)}/${segment(instanceId)}/${segment(name)}`,
+    processorLag: (application: string, instanceId: string, name: string) =>
+      `/api/console/processors/${segment(application)}/${segment(instanceId)}/${segment(name)}/lag`,
+    commandsInFlight: "/api/console/commands/in-flight",
     dlq: "/api/console/dlq",
     dlqSequences: (application: string, instanceId: string, processor: string) =>
       `/api/console/dlq/${segment(application)}/${segment(instanceId)}/${segment(processor)}/sequences`,
@@ -53,6 +56,16 @@ export const ENDPOINTS = {
         `/api/console/actions/processors/${segment(application)}/${segment(instanceId)}/${segment(name)}/pause`,
       startProcessor: (application: string, instanceId: string, name: string) =>
         `/api/console/actions/processors/${segment(application)}/${segment(instanceId)}/${segment(name)}/start`,
+      pauseAllProcessor: (application: string, name: string) =>
+        `/api/console/actions/processors/${segment(application)}/${segment(name)}/pause-all`,
+      startAllProcessor: (application: string, name: string) =>
+        `/api/console/actions/processors/${segment(application)}/${segment(name)}/start-all`,
+      cancelScheduledEvent: (
+        application: string,
+        taskName: string,
+        taskInstance: string,
+      ) =>
+        `/api/console/actions/scheduled-events/${segment(application)}/${segment(taskName)}/${segment(taskInstance)}`,
       resetProcessor: (application: string, instanceId: string, name: string) =>
         `/api/console/actions/processors/${segment(application)}/${segment(instanceId)}/${segment(name)}/reset`,
       splitSegment: (

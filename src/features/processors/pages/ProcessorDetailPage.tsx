@@ -20,10 +20,22 @@ import { Modal } from "@/shared/components/Modal"
 import { RangeSelector, type MetricsRange } from "@/shared/components/RangeSelector"
 import { TimeSeriesChart } from "@/shared/components/TimeSeriesChart"
 import { useProcessorActions } from "../hooks/useProcessorActions"
+import { useProcessorLag } from "../hooks/useProcessorLag"
 import { useProcessorMetrics } from "../hooks/useProcessorMetrics"
 import { useProcessorDetail } from "../hooks/useProcessors"
 
 type ResetPosition = "TAIL" | "HEAD" | "INSTANT"
+
+function segmentLag(
+  segments: Array<{ segmentId: number; lag: number | null }> | undefined,
+  segmentId: number,
+): string {
+  const segment = segments?.find((entry) => entry.segmentId === segmentId)
+  if (!segment || segment.lag === null || segment.lag === undefined) {
+    return "—"
+  }
+  return segment.lag.toLocaleString("fr-FR")
+}
 
 export function ProcessorDetailPage() {
   const params = useParams<{
@@ -43,6 +55,7 @@ export function ProcessorDetailPage() {
   const actions = useProcessorActions(application, instanceId, name)
   const [range, setRange] = useState<MetricsRange>("1h")
   const metrics = useProcessorMetrics(application, instanceId, name, range)
+  const lag = useProcessorLag(application, instanceId, name)
   const [resetOpen, setResetOpen] = useState(false)
   const [position, setPosition] = useState<ResetPosition>("TAIL")
   const [instant, setInstant] = useState("")
@@ -107,6 +120,26 @@ export function ProcessorDetailPage() {
             </Button>
           )}
           <Button
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            title="Pause sur toutes les instances hébergeant ce processor"
+            onClick={() => actions.pauseAll.mutate()}
+          >
+            <Pause className="size-4" aria-hidden />
+            Pause toutes
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={busy}
+            title="Start sur toutes les instances hébergeant ce processor"
+            onClick={() => actions.startAll.mutate()}
+          >
+            <Play className="size-4" aria-hidden />
+            Start toutes
+          </Button>
+          <Button
             variant="destructive"
             size="sm"
             disabled={busy || processor.running || !processor.supportsReset}
@@ -164,6 +197,23 @@ export function ProcessorDetailPage() {
               {segments.length} / {processor.capacity || "—"} / {processor.activeThreads}
             </p>
           </div>
+          <div>
+            <p className="text-muted-foreground">Lag (messages de retard)</p>
+            <p>
+              {lag.data?.maxLag !== null && lag.data?.maxLag !== undefined ? (
+                <Badge variant={lag.data.maxLag > 0 ? "destructive" : "secondary"}>
+                  {lag.data.maxLag.toLocaleString("fr-FR")}
+                </Badge>
+              ) : (
+                "—"
+              )}
+              {lag.data?.tailPosition !== null && lag.data?.tailPosition !== undefined ? (
+                <span className="ml-2 text-xs text-muted-foreground">
+                  tail {lag.data.tailPosition.toLocaleString("fr-FR")}
+                </span>
+              ) : null}
+            </p>
+          </div>
           {processor.warnings.length > 0 ? (
             <div className="sm:col-span-2 lg:col-span-4">
               <p className="text-muted-foreground">Warnings</p>
@@ -215,6 +265,7 @@ export function ProcessorDetailPage() {
             <tr>
               <th className="px-4 py-2 font-medium">Segment</th>
               <th className="px-4 py-2 font-medium">Position</th>
+              <th className="px-4 py-2 font-medium">Lag</th>
               <th className="px-4 py-2 font-medium">État</th>
               <th className="px-4 py-2 font-medium">Détail</th>
               <th className="px-4 py-2" />
@@ -223,7 +274,7 @@ export function ProcessorDetailPage() {
           <tbody className="divide-y divide-border">
             {segments.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-muted-foreground">
+                <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
                   Aucun segment remonté.
                 </td>
               </tr>
@@ -240,6 +291,9 @@ export function ProcessorDetailPage() {
                         reset : {formatPosition(segment.resetPosition)}
                       </div>
                     ) : null}
+                  </td>
+                  <td className="px-4 py-2 text-xs">
+                    {segmentLag(lag.data?.segments, segment.segmentId)}
                   </td>
                   <td className="px-4 py-2">
                     <div className="flex flex-wrap gap-1">

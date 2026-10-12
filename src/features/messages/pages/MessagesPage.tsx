@@ -3,6 +3,7 @@ import { RefreshCw } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { formatDateTime } from "@/lib/format"
 import { formatNumber, type PrometheusResult } from "@/lib/metrics"
 import { ApplicationSelect } from "@/shared/components/ApplicationSelect"
 import { ErrorState, LoadingState } from "@/shared/components/DataState"
@@ -11,6 +12,7 @@ import { PageHeader } from "@/shared/components/PageHeader"
 import { RangeSelector, type MetricsRange } from "@/shared/components/RangeSelector"
 import { TimeSeriesChart } from "@/shared/components/TimeSeriesChart"
 import { useApplications } from "@/features/applications"
+import { useInFlightCommands } from "../hooks/useInFlightCommands"
 import { useMessageMetrics } from "../hooks/useMessageMetrics"
 
 function MessageMetricsPage({
@@ -34,6 +36,7 @@ function MessageMetricsPage({
     application,
     range,
   )
+  const inFlight = useInFlightCommands(kind === "commands" ? application : "")
   const result = pick(data)
 
   return (
@@ -79,7 +82,8 @@ function MessageMetricsPage({
       ) : error ? (
         <ErrorState error={error} onRetry={() => void refetch()} />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
           <TimeSeriesChart
             title={`${title} — débit par message`}
             result={result}
@@ -130,6 +134,50 @@ function MessageMetricsPage({
               </tbody>
             </table>
           </div>
+          </div>
+
+          {kind === "commands" ? (
+            <div className="overflow-x-auto rounded-lg border border-border bg-background">
+              <div className="flex items-center justify-between border-b border-border px-4 py-2">
+                <h2 className="text-sm font-medium">Commandes en vol</h2>
+                <Badge variant="outline">
+                  {inFlight.data?.reduce((total, entry) => total + entry.count, 0) ?? 0} en cours
+                </Badge>
+              </div>
+              {inFlight.data && inFlight.data.length > 0 ? (
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/50 text-left text-xs tracking-wide text-muted-foreground uppercase">
+                    <tr>
+                      <th className="px-4 py-2 font-medium">Commande</th>
+                      <th className="px-4 py-2 font-medium">En cours</th>
+                      <th className="px-4 py-2 font-medium">Plus ancienne</th>
+                      <th className="px-4 py-2 font-medium">Instances</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {inFlight.data.map((entry) => (
+                      <tr key={entry.name}>
+                        <td className="px-4 py-2 font-mono text-xs">{entry.name}</td>
+                        <td className="px-4 py-2">
+                          <Badge variant="secondary">{entry.count}</Badge>
+                        </td>
+                        <td className="px-4 py-2 text-xs">
+                          {entry.oldestStart ? formatDateTime(entry.oldestStart) : "—"}
+                        </td>
+                        <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
+                          {entry.instances.join(", ")}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="px-4 py-4 text-sm text-muted-foreground">
+                  Aucune commande en cours (ou métriques indisponibles).
+                </p>
+              )}
+            </div>
+          ) : null}
         </div>
       )}
     </section>

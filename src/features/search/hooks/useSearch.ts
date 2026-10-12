@@ -11,10 +11,10 @@ export function useAggregateEvents(application: string, aggregateId: string) {
   })
 }
 
-export function useSnapshots(application: string, aggregateId: string) {
+export function useSnapshots(application: string, aggregateId: string, withPayload: boolean) {
   return useQuery({
-    queryKey: queryKeys.search.snapshots(application, aggregateId),
-    queryFn: () => searchService.snapshots(application, aggregateId),
+    queryKey: [...queryKeys.search.snapshots(application, aggregateId), withPayload],
+    queryFn: () => searchService.snapshots(application, aggregateId, withPayload),
     enabled: Boolean(application && aggregateId),
   })
 }

@@ -16,4 +16,8 @@ export const scheduledEventsService = {
     api.get<ScheduledEventView[]>(ENDPOINTS.console.search.scheduledEvents, {
       params: { application, limit },
     }),
+  cancel: (application: string, taskName: string, taskInstance: string): Promise<void> =>
+    api.delete<void>(
+      ENDPOINTS.console.actions.cancelScheduledEvent(application, taskName, taskInstance),
+    ),
 }

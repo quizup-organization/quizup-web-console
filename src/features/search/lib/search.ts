@@ -20,6 +20,7 @@ export interface SnapshotView {
   payloadType: string | null
   payloadRevision: string | null
   timestamp: string | null
+  payload: unknown
 }
 
 export interface EventSearchView {
@@ -54,8 +55,12 @@ export const searchService = {
     api.get<EventSearchView[]>(ENDPOINTS.console.search.eventsByType, {
       params: { application, type, within, limit },
     }),
-  snapshots: (application: string, aggregateId: string): Promise<SnapshotView[]> =>
+  snapshots: (
+    application: string,
+    aggregateId: string,
+    withPayload = false,
+  ): Promise<SnapshotView[]> =>
     api.get<SnapshotView[]>(ENDPOINTS.console.search.snapshots, {
-      params: { application, aggregateId },
+      params: { application, aggregateId, withPayload },
     }),
 }

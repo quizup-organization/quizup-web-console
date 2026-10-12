@@ -16,6 +16,12 @@ export const queryKeys = {
       ["console", "processors", "list", application ?? "all"] as const,
     detail: (application: string, instanceId: string, name: string) =>
       ["console", "processors", "detail", application, instanceId, name] as const,
+    lag: (application: string, instanceId: string, name: string) =>
+      ["console", "processors", "lag", application, instanceId, name] as const,
+  },
+  commands: {
+    inFlight: (application?: string) =>
+      ["console", "commands", "in-flight", application ?? "all"] as const,
   },
   dlq: {
     all: ["console", "dlq"] as const,

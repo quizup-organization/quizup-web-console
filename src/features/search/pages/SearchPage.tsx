@@ -50,10 +50,15 @@ export function SearchPage() {
   const [aggregateId, setAggregateId] = useState("")
   const [type, setType] = useState("")
   const [within, setWithin] = useState("24h")
+  const [withPayload, setWithPayload] = useState(false)
 
   const { data: eventTypes } = useEventTypes()
   const events = useAggregateEvents(application, mode === "aggregate" ? aggregateId : "")
-  const snapshots = useSnapshots(application, mode === "aggregate" ? aggregateId : "")
+  const snapshots = useSnapshots(
+    application,
+    mode === "aggregate" ? aggregateId : "",
+    withPayload,
+  )
   const byType = useEventsByType(
     mode === "type" ? application || undefined : undefined,
     mode === "type" ? type || undefined : undefined,
@@ -276,8 +281,17 @@ export function SearchPage() {
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-border bg-background">
-            <div className="border-b border-border px-4 py-2">
+            <div className="flex items-center justify-between border-b border-border px-4 py-2">
               <h2 className="text-sm font-medium">Snapshots</h2>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={withPayload}
+                  onChange={(event) => setWithPayload(event.target.checked)}
+                  className="size-4"
+                />
+                Inclure le payload
+              </label>
             </div>
             {snapshots.data && snapshots.data.length > 0 ? (
               <table className="w-full text-sm">
@@ -287,6 +301,7 @@ export function SearchPage() {
                     <th className="px-4 py-2 font-medium">Type d'agrégat</th>
                     <th className="px-4 py-2 font-medium">Payload</th>
                     <th className="px-4 py-2 font-medium">Horodatage</th>
+                    {withPayload ? <th className="px-4 py-2 font-medium">Contenu</th> : null}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -302,6 +317,15 @@ export function SearchPage() {
                       <td className="px-4 py-2 whitespace-nowrap">
                         {formatDateTime(snapshot.timestamp)}
                       </td>
+                      {withPayload ? (
+                        <td className="px-4 py-2">
+                          {snapshot.payload ? (
+                            <JsonViewer value={snapshot.payload} maxHeight={200} />
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>

@@ -1,6 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
+import { api } from "@/lib/api"
+import { ENDPOINTS } from "@/lib/endpoints"
 import { queryKeys } from "@/lib/query-keys"
 import type { ApiError } from "@/shared/types/api"
 import {
@@ -32,6 +34,24 @@ export function useProcessorActions(
     start: useMutation({
       mutationFn: () => processorActionsService.start(application, instanceId, name),
       onSuccess: () => onSuccess("Processor démarré"),
+      onError,
+    }),
+    pauseAll: useMutation({
+      mutationFn: () =>
+        api.post<{ instances: number; succeeded: number; failures: string[] }>(
+          ENDPOINTS.console.actions.pauseAllProcessor(application, name),
+        ),
+      onSuccess: (result) =>
+        onSuccess(`${result.succeeded}/${result.instances} instance(s) en pause`),
+      onError,
+    }),
+    startAll: useMutation({
+      mutationFn: () =>
+        api.post<{ instances: number; succeeded: number; failures: string[] }>(
+          ENDPOINTS.console.actions.startAllProcessor(application, name),
+        ),
+      onSuccess: (result) =>
+        onSuccess(`${result.succeeded}/${result.instances} instance(s) démarrée(s)`),
       onError,
     }),
     reset: useMutation({

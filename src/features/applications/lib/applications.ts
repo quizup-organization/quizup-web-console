@@ -6,6 +6,7 @@ export interface InstanceView {
   application: string
   instanceId: string
   version: string | null
+  address: string | null
   uptimeSeconds: number
   firstSeen: string
   lastSeen: string

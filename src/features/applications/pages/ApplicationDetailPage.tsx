@@ -63,6 +63,7 @@ export function ApplicationDetailPage() {
             <tr>
               <th className="px-4 py-2 font-medium">Instance</th>
               <th className="px-4 py-2 font-medium">Version</th>
+              <th className="px-4 py-2 font-medium">Adresse</th>
               <th className="px-4 py-2 font-medium">Uptime</th>
               <th className="px-4 py-2 font-medium">Dernière remontée</th>
               <th className="px-4 py-2 font-medium">État</th>
@@ -73,6 +74,7 @@ export function ApplicationDetailPage() {
               <tr key={instance.instanceId}>
                 <td className="px-4 py-2 font-mono text-xs">{instance.instanceId}</td>
                 <td className="px-4 py-2">{instance.version ?? "—"}</td>
+                <td className="px-4 py-2 font-mono text-xs">{instance.address ?? "—"}</td>
                 <td className="px-4 py-2">{formatUptime(instance.uptimeSeconds)}</td>
                 <td className="px-4 py-2 whitespace-nowrap">
                   {formatDateTime(instance.lastSeen)}

@@ -7,9 +7,12 @@ import { formatDateTime } from "@/lib/format"
 import { ApplicationSelect } from "@/shared/components/ApplicationSelect"
 import { EmptyState, ErrorState, LoadingState } from "@/shared/components/DataState"
 import { FilterBar, FilterField } from "@/shared/components/FilterBar"
+import { Modal } from "@/shared/components/Modal"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { useApplications } from "@/features/applications"
+import { useCancelScheduledEvent } from "../hooks/useScheduledActions"
 import { useScheduledEvents } from "../hooks/useScheduledEvents"
+import type { ScheduledEventView } from "../lib/scheduled"
 
 /**
  * Scheduled events (deadlines persistantes db-scheduler) — contenu natif Axon Server.
@@ -21,6 +24,8 @@ export function ScheduledEventsPage() {
   ].sort()
   const [application, setApplication] = useState("")
   const { data, isPending, error, refetch, isFetching } = useScheduledEvents(application)
+  const cancel = useCancelScheduledEvent(application)
+  const [pendingCancel, setPendingCancel] = useState<ScheduledEventView | null>(null)
 
   return (
     <section className="space-y-4">
@@ -74,6 +79,7 @@ export function ScheduledEventsPage() {
                 <th className="px-4 py-2 font-medium">État</th>
                 <th className="px-4 py-2 font-medium">Dernier succès</th>
                 <th className="px-4 py-2 font-medium">Échecs consécutifs</th>
+                <th className="px-4 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -101,12 +107,57 @@ export function ScheduledEventsPage() {
                       "—"
                     )}
                   </td>
+                  <td className="px-4 py-2 text-right">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={cancel.isPending}
+                      onClick={() => setPendingCancel(task)}
+                    >
+                      Annuler
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
+      <Modal
+        open={pendingCancel !== null}
+        onClose={() => setPendingCancel(null)}
+        title="Annuler la tâche planifiée ?"
+        description={
+          pendingCancel
+            ? `${pendingCancel.taskName} / ${pendingCancel.taskInstance} — la deadline sera supprimée (action auditée).`
+            : undefined
+        }
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setPendingCancel(null)}>
+              Fermer
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={cancel.isPending}
+              onClick={() => {
+                if (pendingCancel) {
+                  cancel.mutate(
+                    {
+                      taskName: pendingCancel.taskName,
+                      taskInstance: pendingCancel.taskInstance,
+                    },
+                    { onSuccess: () => setPendingCancel(null) },
+                  )
+                }
+              }}
+            >
+              Annuler la tâche
+            </Button>
+          </>
+        }
+      />
     </section>
   )
 }
