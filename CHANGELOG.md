@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.2.0...v1.3.0) (2026-10-12)
+
+### Features
+
+* métriques JVM sur la fiche application + compteur de processors en retard (dashboard) ([a6793c4](https://github.com/quizup-organization/quizup-web-console/commit/a6793c4e6ef54d52a5ecf7df5cbf143f9351a22e))
+
 ## [1.2.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.1.0...v1.2.0) (2026-10-12)
 
 ### Features
