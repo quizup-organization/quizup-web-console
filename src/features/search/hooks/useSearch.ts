@@ -19,10 +19,21 @@ export function useSnapshots(application: string, aggregateId: string) {
   })
 }
 
-export function useEventsByType(application: string, type: string) {
+export function useEventsByType(
+  application: string | undefined,
+  type: string | undefined,
+  within: string,
+) {
   return useQuery({
-    queryKey: queryKeys.search.eventsByType(application, type),
-    queryFn: () => searchService.eventsByType(application, type),
-    enabled: Boolean(application),
+    queryKey: queryKeys.search.eventsByType(application ?? "", type ?? "", within),
+    queryFn: () => searchService.eventsByType(application, type, within),
+  })
+}
+
+export function useEventTypes() {
+  return useQuery({
+    queryKey: queryKeys.search.eventTypes(),
+    queryFn: () => searchService.eventTypes(),
+    staleTime: 5 * 60_000,
   })
 }

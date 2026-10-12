@@ -4,7 +4,9 @@ import { RefreshCw } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { formatNumber, type PrometheusResult } from "@/lib/metrics"
+import { ApplicationSelect } from "@/shared/components/ApplicationSelect"
 import { ErrorState, LoadingState } from "@/shared/components/DataState"
+import { FilterBar, FilterField } from "@/shared/components/FilterBar"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { RangeSelector, type MetricsRange } from "@/shared/components/RangeSelector"
 import { TimeSeriesChart } from "@/shared/components/TimeSeriesChart"
@@ -22,7 +24,10 @@ function MessageMetricsPage({
   description: string
   pick: (metrics: ReturnType<typeof useMessageMetrics>["data"]) => PrometheusResult | undefined
 }) {
-  const { data: applications } = useApplications()
+  const { data: instances } = useApplications()
+  const applications = [
+    ...new Set((instances ?? []).map((instance) => instance.application)),
+  ].sort()
   const [application, setApplication] = useState("")
   const [range, setRange] = useState<MetricsRange>("1h")
   const { data, isPending, error, refetch, isFetching } = useMessageMetrics(
@@ -52,25 +57,18 @@ function MessageMetricsPage({
         }
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <select
-          value={application}
-          onChange={(event) => setApplication(event.target.value)}
-          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-        >
-          <option value="">Choisir une application…</option>
-          {(applications ?? [])
-            .map((instance) => instance.application)
-            .filter((value, index, array) => array.indexOf(value) === index)
-            .sort()
-            .map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-        </select>
-        <RangeSelector value={range} onChange={setRange} />
-      </div>
+      <FilterBar>
+        <FilterField label="Application">
+          <ApplicationSelect
+            applications={applications}
+            value={application}
+            onChange={setApplication}
+          />
+        </FilterField>
+        <FilterField label="Période">
+          <RangeSelector value={range} onChange={setRange} />
+        </FilterField>
+      </FilterBar>
 
       {!application ? (
         <p className="text-sm text-muted-foreground">

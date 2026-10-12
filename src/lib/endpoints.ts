@@ -28,6 +28,7 @@ export const ENDPOINTS = {
     search: {
       events: "/api/console/search/events",
       eventsByType: "/api/console/search/events/by-type",
+      eventTypes: "/api/console/search/event-types",
       snapshots: "/api/console/search/snapshots",
       scheduledEvents: "/api/console/scheduled-events",
     },

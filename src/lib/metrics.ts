@@ -83,3 +83,18 @@ export function formatNumber(value: number | null | undefined, digits = 2): stri
   }
   return value.toLocaleString("fr-FR", { maximumFractionDigits: digits })
 }
+
+/** Taille lisible (octets → Ko/Mo/Go). */
+export function formatBytes(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "—"
+  }
+  const units = ["o", "Ko", "Mo", "Go", "To"]
+  let size = value
+  let unit = 0
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024
+    unit += 1
+  }
+  return `${size.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} ${units[unit]}`
+}

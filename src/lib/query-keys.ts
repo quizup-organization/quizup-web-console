@@ -56,8 +56,9 @@ export const queryKeys = {
   search: {
     events: (application: string, aggregateId: string) =>
       ["console", "search", "events", application, aggregateId] as const,
-    eventsByType: (application: string, type: string) =>
-      ["console", "search", "events-by-type", application, type] as const,
+    eventsByType: (application: string, type: string, within: string) =>
+      ["console", "search", "events-by-type", application, type, within] as const,
+    eventTypes: () => ["console", "search", "event-types"] as const,
     snapshots: (application: string, aggregateId: string) =>
       ["console", "search", "snapshots", application, aggregateId] as const,
     scheduledEvents: (application: string) =>

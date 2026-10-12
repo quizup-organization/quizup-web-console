@@ -23,6 +23,7 @@ export interface SnapshotView {
 }
 
 export interface EventSearchView {
+  application: string
   id: string
   aggregateId: string
   aggregateType: string
@@ -34,6 +35,8 @@ export interface EventSearchView {
 }
 
 export const searchService = {
+  eventTypes: (): Promise<string[]> =>
+    api.get<string[]>(ENDPOINTS.console.search.eventTypes),
   events: (
     application: string,
     aggregateId: string,
@@ -43,12 +46,13 @@ export const searchService = {
       params: { application, aggregateId, minSequence },
     }),
   eventsByType: (
-    application: string,
-    type: string,
+    application: string | undefined,
+    type: string | undefined,
+    within: string,
     limit = 50,
   ): Promise<EventSearchView[]> =>
     api.get<EventSearchView[]>(ENDPOINTS.console.search.eventsByType, {
-      params: { application, type, limit },
+      params: { application, type, within, limit },
     }),
   snapshots: (application: string, aggregateId: string): Promise<SnapshotView[]> =>
     api.get<SnapshotView[]>(ENDPOINTS.console.search.snapshots, {

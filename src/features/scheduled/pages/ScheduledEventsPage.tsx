@@ -4,7 +4,9 @@ import { RefreshCw } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { formatDateTime } from "@/lib/format"
+import { ApplicationSelect } from "@/shared/components/ApplicationSelect"
 import { EmptyState, ErrorState, LoadingState } from "@/shared/components/DataState"
+import { FilterBar, FilterField } from "@/shared/components/FilterBar"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { useApplications } from "@/features/applications"
 import { useScheduledEvents } from "../hooks/useScheduledEvents"
@@ -13,7 +15,10 @@ import { useScheduledEvents } from "../hooks/useScheduledEvents"
  * Scheduled events (deadlines persistantes db-scheduler) — contenu natif Axon Server.
  */
 export function ScheduledEventsPage() {
-  const { data: applications } = useApplications()
+  const { data: instances } = useApplications()
+  const applications = [
+    ...new Set((instances ?? []).map((instance) => instance.application)),
+  ].sort()
   const [application, setApplication] = useState("")
   const { data, isPending, error, refetch, isFetching } = useScheduledEvents(application)
 
@@ -38,22 +43,15 @@ export function ScheduledEventsPage() {
         }
       />
 
-      <select
-        value={application}
-        onChange={(event) => setApplication(event.target.value)}
-        className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-      >
-        <option value="">Choisir une application…</option>
-        {(applications ?? [])
-          .map((instance) => instance.application)
-          .filter((value, index, array) => array.indexOf(value) === index)
-          .sort()
-          .map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-      </select>
+      <FilterBar>
+        <FilterField label="Application">
+          <ApplicationSelect
+            applications={applications}
+            value={application}
+            onChange={setApplication}
+          />
+        </FilterField>
+      </FilterBar>
 
       {!application ? (
         <p className="text-sm text-muted-foreground">

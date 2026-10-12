@@ -29,6 +29,11 @@ export interface DashboardResponse {
       reachable: boolean
     }>
   }
+  storage: {
+    databases: PrometheusResult
+    nodeDiskAvailable: PrometheusResult
+    nodeDiskTotal: PrometheusResult
+  }
 }
 
 export const dashboardService = {

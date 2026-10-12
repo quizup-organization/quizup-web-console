@@ -3,7 +3,7 @@ import { RefreshCw } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { formatNumber, type PrometheusResult } from "@/lib/metrics"
+import { formatBytes, formatNumber, type PrometheusResult } from "@/lib/metrics"
 import { ErrorState, LoadingState } from "@/shared/components/DataState"
 import { PageHeader } from "@/shared/components/PageHeader"
 import { StatCard } from "@/shared/components/StatCard"
@@ -180,6 +180,72 @@ export function DashboardPage() {
           </table>
         </div>
       </div>
+
+      <div className="overflow-x-auto rounded-lg border border-border bg-background">
+        <div className="flex items-center justify-between border-b border-border px-4 py-2">
+          <h2 className="text-sm font-medium">Stockage</h2>
+          {!metricsEnabled ? (
+            <Badge variant="outline">Prometheus non configuré</Badge>
+          ) : null}
+        </div>
+        <div className="grid gap-0 lg:grid-cols-2 lg:divide-x lg:divide-border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left text-xs tracking-wide text-muted-foreground uppercase">
+              <tr>
+                <th className="px-4 py-2 font-medium">Base Postgres</th>
+                <th className="px-4 py-2 font-medium">Taille</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {latestByLabel(data.storage.databases, "datname").length === 0 ? (
+                <tr>
+                  <td colSpan={2} className="px-4 py-4 text-center text-muted-foreground">
+                    Aucune donnée
+                  </td>
+                </tr>
+              ) : (
+                latestByLabel(data.storage.databases, "datname").map((entry) => (
+                  <tr key={entry.label}>
+                    <td className="px-4 py-2 font-mono text-xs">{entry.label}</td>
+                    <td className="px-4 py-2">{formatBytes(entry.value)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50 text-left text-xs tracking-wide text-muted-foreground uppercase">
+              <tr>
+                <th className="px-4 py-2 font-medium">Nœud</th>
+                <th className="px-4 py-2 font-medium">Disque racine</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {nodeDisks(data.storage).length === 0 ? (
+                <tr>
+                  <td colSpan={2} className="px-4 py-4 text-center text-muted-foreground">
+                    Aucune donnée
+                  </td>
+                </tr>
+              ) : (
+                nodeDisks(data.storage).map((node) => (
+                  <tr key={node.instance}>
+                    <td className="px-4 py-2 font-mono text-xs">{node.instance}</td>
+                    <td className="px-4 py-2">
+                      {formatBytes(node.available)} libres / {formatBytes(node.total)}
+                      {node.total > 0 ? (
+                        <Badge variant="outline" className="ml-2">
+                          {Math.round((1 - node.available / node.total) * 100)}% utilisés
+                        </Badge>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
   )
 }
@@ -194,4 +260,43 @@ function rateByApplication(result: PrometheusResult | undefined): Map<string, nu
     }
   }
   return rates
+}
+
+/** Dernières valeurs d'un résultat, triées par valeur décroissante, étiquetées par un label. */
+function latestByLabel(
+  result: PrometheusResult | undefined,
+  label: string,
+): Array<{ label: string; value: number }> {
+  const entries: Array<{ label: string; value: number }> = []
+  for (const series of result?.series ?? []) {
+    const labelValue = series.metric[label]
+    const last = series.samples.at(-1)
+    if (labelValue && last && Number.isFinite(last.value)) {
+      entries.push({ label: labelValue, value: last.value })
+    }
+  }
+  return entries.sort((left, right) => right.value - left.value)
+}
+
+/** Espace disque racine par nœud (fusion des séries disponibles/total par `instance`). */
+function nodeDisks(storage: {
+  nodeDiskAvailable: PrometheusResult
+  nodeDiskTotal: PrometheusResult
+}): Array<{ instance: string; available: number; total: number }> {
+  const available = new Map<string, number>()
+  for (const series of storage.nodeDiskAvailable?.series ?? []) {
+    const last = series.samples.at(-1)
+    if (series.metric.instance && last) {
+      available.set(series.metric.instance, last.value)
+    }
+  }
+  const disks: Array<{ instance: string; available: number; total: number }> = []
+  for (const series of storage.nodeDiskTotal?.series ?? []) {
+    const last = series.samples.at(-1)
+    const instance = series.metric.instance
+    if (instance && last) {
+      disks.push({ instance, total: last.value, available: available.get(instance) ?? 0 })
+    }
+  }
+  return disks.sort((left, right) => left.instance.localeCompare(right.instance))
 }
