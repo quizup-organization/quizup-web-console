@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { ArrowLeft, RefreshCw } from "lucide-react"
 
@@ -7,12 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDateTime, formatUptime, isStale } from "@/lib/format"
 import { ErrorState, LoadingState } from "@/shared/components/DataState"
 import { PageHeader } from "@/shared/components/PageHeader"
+import { RangeSelector, type MetricsRange } from "@/shared/components/RangeSelector"
+import { TimeSeriesChart } from "@/shared/components/TimeSeriesChart"
 import { useApplicationDetail } from "../hooks/useApplicationDetail"
+import { useApplicationMetrics } from "../hooks/useApplicationMetrics"
 
 export function ApplicationDetailPage() {
   const params = useParams<{ application: string }>()
   const application = params.application ?? ""
   const { data, isPending, error, refetch, isFetching } = useApplicationDetail(application)
+  const [range, setRange] = useState<MetricsRange>("1h")
+  const metrics = useApplicationMetrics(application, range)
 
   if (isPending) {
     return <LoadingState rows={5} />
@@ -143,6 +149,37 @@ export function ApplicationDetailPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium">Métriques JVM</h2>
+          <RangeSelector value={range} onChange={setRange} />
+        </div>
+        <div className="grid gap-3 lg:grid-cols-2">
+          <TimeSeriesChart
+            title="Mémoire heap (par instance)"
+            result={metrics.data?.heapUsed}
+            labelKey="instance"
+            unit="octets"
+          />
+          <TimeSeriesChart
+            title="CPU processus (par instance)"
+            result={metrics.data?.processCpu}
+            labelKey="instance"
+            unit="ratio"
+          />
+          <TimeSeriesChart
+            title="Threads (par instance)"
+            result={metrics.data?.threads}
+            labelKey="instance"
+          />
+          <TimeSeriesChart
+            title="Requêtes HTTP/s"
+            result={metrics.data?.httpRate}
+            unit="/s"
+          />
+        </div>
       </div>
     </section>
   )

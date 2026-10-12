@@ -53,7 +53,7 @@ export function DashboardPage() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard
           label="Instances connectées"
           value={data.counts.instances}
@@ -64,6 +64,12 @@ export function DashboardPage() {
           value={data.counts.processorsInError}
           tone={data.counts.processorsInError > 0 ? "danger" : "success"}
           hint={`${data.counts.processorsReplaying} en replay`}
+        />
+        <StatCard
+          label="Processors en retard"
+          value={data.counts.processorsNotCaughtUp}
+          tone={data.counts.processorsNotCaughtUp > 0 ? "warning" : "success"}
+          hint="Segments non à jour"
         />
         <StatCard
           label="Dead letters"

@@ -1,5 +1,6 @@
 import { api } from "@/lib/api"
 import { ENDPOINTS } from "@/lib/endpoints"
+import type { PrometheusResult } from "@/lib/metrics"
 
 export interface InstanceView {
   application: string
@@ -8,6 +9,14 @@ export interface InstanceView {
   uptimeSeconds: number
   firstSeen: string
   lastSeen: string
+}
+
+export interface ApplicationMetricsView {
+  heapUsed: PrometheusResult
+  processCpu: PrometheusResult
+  systemCpu: PrometheusResult
+  threads: PrometheusResult
+  httpRate: PrometheusResult
 }
 
 export interface ApplicationDetailView {
@@ -55,4 +64,8 @@ export const applicationsService = {
     api.get<InstanceView[]>(ENDPOINTS.console.applications),
   detail: (application: string): Promise<ApplicationDetailView> =>
     api.get<ApplicationDetailView>(ENDPOINTS.console.application(application)),
+  metrics: (application: string, range: string): Promise<ApplicationMetricsView> =>
+    api.get<ApplicationMetricsView>(ENDPOINTS.console.metrics.application(application), {
+      params: { range },
+    }),
 }

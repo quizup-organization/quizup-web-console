@@ -9,6 +9,7 @@ export interface DashboardResponse {
     processors: number
     processorsInError: number
     processorsReplaying: number
+    processorsNotCaughtUp: number
     dlqProcessors: number
     dlqMessages: number
     dlqSequences: number
