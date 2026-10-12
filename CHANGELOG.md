@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.3.0...v1.4.0) (2026-10-12)
+
+### Features
+
+* lag, commandes en vol, annulation scheduled, payload snapshots, adresses d'instance ([3f8d81a](https://github.com/quizup-organization/quizup-web-console/commit/3f8d81a8e0391747f92ab46a9befb398ed8d8acf))
+
 ## [1.3.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.2.0...v1.3.0) (2026-10-12)
 
 ### Features
