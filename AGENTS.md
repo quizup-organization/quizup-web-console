@@ -44,19 +44,24 @@ src/
 ├── features/
 │   ├── auth/          # oidc, session store, AdminGate, pages login/callback
 │   ├── shell/         # AppShell (sidebar + topbar + Outlet)
-│   ├── applications/  # réplicas connectés (version, uptime, lastSeen)
-│   ├── processors/    # liste + détail (segments, pause/start/reset/split/merge)
+│   ├── dashboard/     # tableau de bord (compteurs, débits, event stores)
+│   ├── applications/  # réplicas + détail application (instances, handlers, processors)
+│   ├── processors/    # liste + détail (segments, actions, charts métriques)
+│   ├── messages/      # Commandes / Queries (débits par message, charts)
+│   ├── scheduled/     # scheduled events (deadlines db-scheduler)
+│   ├── search/        # recherche événements/snapshots (payload JSON)
 │   ├── dlq/           # stats par processor + séquences (retry/suppression/purge)
+│   ├── users/         # admin OIDC + acteurs d'audit
 │   └── audit/         # journal des actions
-├── lib/               # api-client, api, config, endpoints, query-keys, session (gateway), format
+├── lib/               # api-client, api, config, endpoints, metrics (Prometheus), query-keys, session, format
 ├── routes/            # AppRoutes (lazy pages, AdminGate + AppShell)
-├── shared/            # DataState (loading/empty/error), Modal, PageHeader, FullScreenLoader
+├── shared/            # DataState, Modal, PageHeader, StatCard, TimeSeriesChart (recharts), RangeSelector, JsonViewer
 └── components/ui/     # primitives shadcn (button, card, badge, input, label, separator, skeleton)
 ```
 
-Routes : `/login`, `/callback`, `/silent-callback`, puis sous garde admin `/applications`,
-`/processors`, `/processors/:application/:instanceId/:name`,
-`/dlq`, `/dlq/:application/:instanceId/:processor`, `/audit`.
+Routes : `/login`, `/callback`, `/silent-callback`, puis sous garde admin `/` (Dashboard),
+`/applications`, `/applications/:application`, `/processors` (+ détail), `/commands`, `/queries`,
+`/scheduled-events`, `/search`, `/dlq` (+ détail), `/users`, `/audit`.
 
 ## 4. Commandes
 
