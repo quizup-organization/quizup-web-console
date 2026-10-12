@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.1.0...v1.2.0) (2026-10-12)
+
+### Features
+
+* filtres user-friendly (selects, fenêtre temporelle, stockage) ([8e66a3d](https://github.com/quizup-organization/quizup-web-console/commit/8e66a3d700e1512f842ea230c0fb42fbca26000c))
+
 ## [1.1.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.0.0...v1.1.0) (2026-10-12)
 
 ### Features
