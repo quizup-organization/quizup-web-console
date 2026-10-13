@@ -14,6 +14,7 @@ import {
 import { AuditPage } from "@/features/audit/pages"
 import { DashboardPage } from "@/features/dashboard/pages"
 import { DlqPage, DlqProcessorPage } from "@/features/dlq/pages"
+import { MediaPage } from "@/features/media/pages"
 import { CommandsPage, QueriesPage } from "@/features/messages/pages"
 import {
   ProcessorDetailPage,
@@ -57,6 +58,7 @@ export function AppRoutes() {
             />
             <Route path="users" element={<UsersPage />} />
             <Route path="audit" element={<AuditPage />} />
+            <Route path="media" element={<MediaPage />} />
           </Route>
         </Route>
 

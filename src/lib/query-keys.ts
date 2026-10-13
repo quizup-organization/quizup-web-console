@@ -73,4 +73,13 @@ export const queryKeys = {
   users: {
     all: ["console", "users"] as const,
   },
+  media: {
+    all: ["media"] as const,
+    objects: (origin: string, q: string) =>
+      ["media", "objects", origin, q] as const,
+    stats: () => ["media", "stats"] as const,
+    orphans: () => ["media", "orphans"] as const,
+    usage: (page: number, size: number) =>
+      ["media", "usage", page, size] as const,
+  },
 } as const

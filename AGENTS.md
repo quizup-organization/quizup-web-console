@@ -22,6 +22,7 @@ barrels `index.ts` par feature (imports internes interdits par ESLint).
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:8094` | base URL de `quizup-console` |
+| `VITE_BFF_URL` | `http://localhost:8092` | base URL du BFF (surface admin média `/api/admin/media`, `ROLE_ADMIN`) |
 | `VITE_OIDC_AUTHORITY` | `http://localhost:8085` | issuer `quizup-identity` |
 | `VITE_OIDC_CLIENT_ID` | `console` | client public PKCE (à créer dans identity — Lot D) |
 | `VITE_OIDC_REDIRECT_URI` | `http://localhost:5174/callback` | redirect dev (port Vite 5174) |
@@ -51,6 +52,7 @@ src/
 │   ├── scheduled/     # scheduled events (deadlines db-scheduler)
 │   ├── search/        # recherche événements/snapshots (payload JSON)
 │   ├── dlq/           # stats par processor + séquences (retry/suppression/purge)
+│   ├── media/         # console média MinIO (objets, orphelins, usage) — API admin du BFF
 │   ├── users/         # admin OIDC + acteurs d'audit
 │   └── audit/         # journal des actions
 ├── lib/               # api-client, api, config, endpoints, metrics (Prometheus), query-keys, session, format
@@ -61,7 +63,13 @@ src/
 
 Routes : `/login`, `/callback`, `/silent-callback`, puis sous garde admin `/` (Dashboard),
 `/applications`, `/applications/:application`, `/processors` (+ détail), `/commands`, `/queries`,
-`/scheduled-events`, `/search`, `/dlq` (+ détail), `/users`, `/audit`.
+`/scheduled-events`, `/search`, `/dlq` (+ détail), `/media`, `/users`, `/audit`.
+
+**Médias** : la page `/media` consomme la surface admin du **BFF** (`/api/admin/media/**`,
+`ROLE_ADMIN`) via un **second client HTTP** (`src/lib/bff-api.ts`, base `VITE_BFF_URL`) : listing du
+bucket MinIO `quizup-media` (uploads + seed), références métier, orphelins S3 ↔ `media_asset` et
+usage par joueur. Une suppression référencée exige une confirmation « forcer » (`409` sinon),
+la purge d'orphelins conserve les objets référencés.
 
 ## 4. Commandes
 
@@ -80,7 +88,8 @@ npm run build
   `console.quizup.cnadjim.fr` : `/` → SPA, `/api/console` → `quizup-console`) ; Application ArgoCD
   + Image Updater `ghcr.io/quizup-organization/quizup-web-console`.
 - Release : `frontend-release.yml` avec `service-name: quizup-web-console`, client OIDC `console`,
-  `VITE_API_URL=https://console.quizup.cnadjim.fr` (même origine que l'API).
+  `VITE_API_URL=https://console.quizup.cnadjim.fr` (même origine que l'API) et
+  `VITE_BFF_URL=https://api.quizup.cnadjim.fr` (surface admin média, CORS SDK).
 - Client OIDC public `console` déjà déclaré dans `quizup-identity` (dev + prod) ; client
   `server-client` M2M inchangé côté services.
 - TODO : release train (SDK/console/identity/web-console) + sync ArgoCD, scellement

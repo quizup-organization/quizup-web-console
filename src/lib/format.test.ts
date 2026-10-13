@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { formatPosition, formatUptime, isStale } from "./format"
+import { formatBytes, formatPosition, formatUptime, isStale } from "./format"
 
 describe("formatUptime", () => {
   it("formats minutes, hours and days", () => {
@@ -21,6 +21,16 @@ describe("isStale", () => {
 describe("formatPosition", () => {
   it("renders missing positions as a dash", () => {
     expect(formatPosition(null)).toBe("—")
-    expect(formatPosition(1234)).toBe("1 234")
+    expect(formatPosition(1234)).toBe("1\u202f234")
+  })
+})
+
+describe("formatBytes", () => {
+  it("formats bytes with French units", () => {
+    expect(formatBytes(null)).toBe("—")
+    expect(formatBytes(512)).toBe("512 o")
+    expect(formatBytes(2048)).toBe("2 Ko")
+    expect(formatBytes(1536)).toBe("1,5 Ko")
+    expect(formatBytes(5 * 1024 * 1024)).toBe("5 Mo")
   })
 })

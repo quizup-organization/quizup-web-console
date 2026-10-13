@@ -3,6 +3,7 @@ import {
   Activity,
   CalendarClock,
   Gauge,
+  Images,
   Inbox,
   LayoutList,
   LogOut,
@@ -35,6 +36,7 @@ const NAV: NavItem[] = [
   { to: "/scheduled-events", label: "Scheduled", icon: CalendarClock },
   { to: "/search", label: "Recherche", icon: Search },
   { to: "/dlq", label: "Dead Letters", icon: Inbox },
+  { to: "/media", label: "Médias", icon: Images },
   { to: "/users", label: "Utilisateurs", icon: Users },
   { to: "/audit", label: "Audit", icon: ScrollText },
 ]

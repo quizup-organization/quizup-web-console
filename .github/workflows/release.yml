@@ -16,6 +16,8 @@ jobs:
       service-name: quizup-web-console
       # API admin servie sur la MÊME origine (Ingress : /api/console → quizup-console).
       vite-api-url: https://console.quizup.cnadjim.fr
+      # Surface admin média du BFF (cross-origin, CORS SDK) : /api/admin/media/**.
+      vite-bff-url: https://api.quizup.cnadjim.fr
       vite-oidc-authority: https://identity.quizup.cnadjim.fr
       vite-oidc-client-id: console
       vite-oidc-redirect-uri: https://console.quizup.cnadjim.fr/callback

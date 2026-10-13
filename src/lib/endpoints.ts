@@ -1,9 +1,20 @@
 /**
- * Chemins de l'API `quizup-console` (surface admin dédiée, `ROLE_ADMIN`).
+ * Chemins des surfaces admin : `quizup-console` (Axon, `ROLE_ADMIN`) et BFF
+ * (`/api/admin/media`, `ROLE_ADMIN` — appelé en direct sur `VITE_BFF_URL`).
  */
 const segment = (value: string) => encodeURIComponent(value)
 
 export const ENDPOINTS = {
+  bff: {
+    media: {
+      objects: "/api/admin/media/objects",
+      stats: "/api/admin/media/stats",
+      orphans: "/api/admin/media/orphans",
+      usage: "/api/admin/media/usage",
+      asset: (mediaId: string) => `/api/admin/media/assets/${segment(mediaId)}`,
+      purgeOrphans: "/api/admin/media/purge-orphans",
+    },
+  },
   console: {
     dashboard: "/api/console/dashboard",
     applications: "/api/console/applications",

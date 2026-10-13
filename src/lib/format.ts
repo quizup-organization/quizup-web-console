@@ -48,3 +48,21 @@ export function isStale(lastSeen?: string | null, thresholdMs = 90_000): boolean
 export function formatPosition(position?: number | null): string {
   return position === undefined || position === null ? "—" : position.toLocaleString("fr-FR")
 }
+
+/** Taille en octets lisible (o, Ko, Mo, Go, To), décimales françaises. */
+export function formatBytes(value?: number | null): string {
+  if (value === undefined || value === null) {
+    return "—"
+  }
+  if (value < 1024) {
+    return `${value.toLocaleString("fr-FR")} o`
+  }
+  const units = ["Ko", "Mo", "Go", "To"]
+  let size = value / 1024
+  let unit = 0
+  while (size >= 1024 && unit < units.length - 1) {
+    size /= 1024
+    unit++
+  }
+  return `${Number(size.toFixed(2)).toLocaleString("fr-FR")} ${units[unit]}`
+}
