@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.4.0...v1.5.0) (2026-10-13)
+
+### Features
+
+* **console:** page Médias (supervision MinIO, orphelins, purge, usage) ([3931f22](https://github.com/quizup-organization/quizup-web-console/commit/3931f22ffc188c01fa61c74ae456a036bdcd917e))
+
 ## [1.4.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.3.0...v1.4.0) (2026-10-12)
 
 ### Features
