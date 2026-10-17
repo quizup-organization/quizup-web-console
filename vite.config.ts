@@ -45,44 +45,9 @@ export default defineConfig({
     },
   },
   build: {
+    // Pas de découpage manuel (`advancedChunks`) : il créait un cycle de chunks
+    // session → vendor → react en 1.6.0, et le runtime Rolldown finissait dans
+    // `session` → `TypeError: e is not a function` au boot (page blanche).
     chunkSizeWarningLimit: 600,
-    rolldownOptions: {
-      output: {
-        // Sépare les dépendances stables (cache navigateur) du code applicatif.
-        advancedChunks: {
-          groups: [
-            {
-              name: "react",
-              test: /node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/,
-            },
-            {
-              name: "query",
-              test: /node_modules[\\/]@tanstack[\\/]/,
-            },
-            {
-              name: "realtime",
-              test: /node_modules[\\/](@stomp[\\/]stompjs|oidc-client-ts)[\\/]/,
-            },
-            {
-              name: "avatar",
-              test: /node_modules[\\/]@dicebear[\\/]/,
-            },
-            {
-              name: "motion",
-              test: /node_modules[\\/](framer-motion|motion|motion-dom|motion-utils)[\\/]/,
-            },
-            {
-              // Chargé uniquement avec les pages d'auteur (création/gestion), pas au boot.
-              name: "emoji",
-              test: /node_modules[\\/]emoji-picker-react[\\/]/,
-            },
-            {
-              name: "vendor",
-              test: /node_modules[\\/]/,
-            },
-          ],
-        },
-      },
-    },
   },
 })
