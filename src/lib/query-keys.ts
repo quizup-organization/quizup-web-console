@@ -82,4 +82,13 @@ export const queryKeys = {
     usage: (page: number, size: number) =>
       ["media", "usage", page, size] as const,
   },
+  questions: {
+    all: ["questions"] as const,
+    list: (params: unknown) => ["questions", "list", params] as const,
+    queue: (params: unknown) => ["questions", "queue", params] as const,
+    summary: () => ["questions", "summary"] as const,
+    topics: () => ["questions", "topics"] as const,
+    detail: (questionId: string) =>
+      ["questions", "detail", questionId] as const,
+  },
 } as const

@@ -14,6 +14,42 @@ export const ENDPOINTS = {
       asset: (mediaId: string) => `/api/admin/media/assets/${segment(mediaId)}`,
       purgeOrphans: "/api/admin/media/purge-orphans",
     },
+    questions: {
+      list: "/api/admin/questions",
+      detail: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}`,
+      topics: "/api/admin/question-topics",
+      reports: "/api/admin/question-reports",
+      reportSummary: "/api/admin/question-reports/summary",
+      create: (topicId: string) =>
+        `/api/admin/topics/${segment(topicId)}/questions`,
+      text: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/text`,
+      answers: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/answers`,
+      correctAnswer: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/correct-answer`,
+      imageUrl: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/image-url`,
+      translations: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/translations`,
+      approve: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/approve`,
+      reject: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/reject`,
+      suspend: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/suspend`,
+      reinstate: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/reinstate`,
+      archive: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/archive`,
+      restore: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/restore`,
+      resolveReport: (reportId: string) =>
+        `/api/admin/question-reports/${segment(reportId)}/resolve`,
+      resolveReports: (questionId: string) =>
+        `/api/admin/questions/${segment(questionId)}/reports/resolve`,
+    },
   },
   console: {
     dashboard: "/api/console/dashboard",

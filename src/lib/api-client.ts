@@ -93,13 +93,83 @@ export function createApiClient(config: ApiClientConfig) {
     }
   }
 
+  async function requestForm<T>(
+    path: string,
+    form: FormData,
+    options: RequestOptions = {},
+  ): Promise<T> {
+    const url = `${config.baseUrl}${path}${buildQuery(options.params)}`
+    const headers: Record<string, string> = { Accept: "application/json" }
+    const token = config.getAuthToken?.()
+    if (token) {
+      headers.Authorization = `Bearer ${token}`
+    }
+    const controller = new AbortController()
+    const timeout = window.setTimeout(
+      () => controller.abort(),
+      config.defaultTimeoutMs ?? 15_000,
+    )
+    const signal = options.signal
+      ? AbortSignal.any([options.signal, controller.signal])
+      : controller.signal
+    try {
+      let response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: form,
+        signal,
+      })
+      if (response.status === 401 && config.onUnauthorized) {
+        await config.onUnauthorized()
+        const refreshedToken = config.getAuthToken?.()
+        if (refreshedToken) {
+          headers.Authorization = `Bearer ${refreshedToken}`
+          response = await fetch(url, {
+            method: "POST",
+            headers,
+            body: form,
+            signal,
+          })
+        }
+      }
+      if (!response.ok) {
+        const error = await toApiError(response)
+        config.onError?.(error)
+        throw error
+      }
+      if (response.status === 204) {
+        return undefined as T
+      }
+      return (await response.json()) as T
+    } catch (error) {
+      if (isApiError(error)) {
+        throw error
+      }
+      const timedOut = error instanceof DOMException && error.name === "AbortError"
+      const apiError: ApiError = {
+        message: timedOut
+          ? "La console n'a pas répondu dans le délai imparti."
+          : "Impossible de contacter la console.",
+        statusCode: timedOut ? 408 : 0,
+      }
+      config.onError?.(apiError)
+      throw apiError
+    } finally {
+      window.clearTimeout(timeout)
+    }
+  }
+
   return {
     get: <T>(path: string, options?: RequestOptions) =>
       request<T>("GET", path, undefined, options),
     post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
       request<T>("POST", path, body, options),
+    put: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+      request<T>("PUT", path, body, options),
     delete: <T>(path: string, options?: RequestOptions) =>
       request<T>("DELETE", path, undefined, options),
+    postForm: <T>(path: string, form: FormData, options?: RequestOptions) =>
+      requestForm<T>(path, form, options),
   }
 }
 

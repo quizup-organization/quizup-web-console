@@ -22,7 +22,7 @@ barrels `index.ts` par feature (imports internes interdits par ESLint).
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:8094` | base URL de `quizup-console` |
-| `VITE_BFF_URL` | `http://localhost:8092` | base URL du BFF (surface admin média `/api/admin/media`, `ROLE_ADMIN`) |
+| `VITE_BFF_URL` | `http://localhost:8092` | base URL du BFF (surfaces admin média et questions, `ROLE_ADMIN`) |
 | `VITE_OIDC_AUTHORITY` | `http://localhost:8085` | issuer `quizup-identity` |
 | `VITE_OIDC_CLIENT_ID` | `console` | client public PKCE (à créer dans identity — Lot D) |
 | `VITE_OIDC_REDIRECT_URI` | `http://localhost:5174/callback` | redirect dev (port Vite 5174) |
@@ -53,6 +53,7 @@ src/
 │   ├── search/        # recherche événements/snapshots (payload JSON)
 │   ├── dlq/           # stats par processor + séquences (retry/suppression/purge)
 │   ├── media/         # console média MinIO (objets, orphelins, usage) — API admin du BFF
+│   ├── questions/     # signalements + catalogue questions, modération, upload image
 │   ├── users/         # admin OIDC + acteurs d'audit
 │   └── audit/         # journal des actions
 ├── lib/               # api-client, api, config, endpoints, metrics (Prometheus), query-keys, session, format
@@ -63,7 +64,15 @@ src/
 
 Routes : `/login`, `/callback`, `/silent-callback`, puis sous garde admin `/` (Dashboard),
 `/applications`, `/applications/:application`, `/processors` (+ détail), `/commands`, `/queries`,
-`/scheduled-events`, `/search`, `/dlq` (+ détail), `/media`, `/users`, `/audit`.
+`/scheduled-events`, `/search`, `/dlq` (+ détail), `/media`, `/questions` (+ détail), `/users`,
+`/audit`.
+
+**Questions** : `/questions` expose deux onglets — **Signalements** (file groupée par question,
+filtres statut/sujet/suspension/tri) et **Catalogue** (recherche, sujet, statut, difficulté,
+modération, signalées uniquement, création). `/questions/:id` permet l'édition FR/EN, l'upload
+d'image via `POST /api/media`, l'approbation/rejet, la suspension/réactivation, l'archivage/
+restauration et la résolution unitaire ou en masse des signalements. Le badge de navigation
+compte les signalements ouverts (`/api/admin/question-reports/summary`, polling 60 s).
 
 **Médias** : la page `/media` consomme la surface admin du **BFF** (`/api/admin/media/**`,
 `ROLE_ADMIN`) via un **second client HTTP** (`src/lib/bff-api.ts`, base `VITE_BFF_URL`) : listing du

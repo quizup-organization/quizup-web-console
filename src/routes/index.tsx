@@ -20,6 +20,7 @@ import {
   ProcessorDetailPage,
   ProcessorsPage,
 } from "@/features/processors/pages"
+import { QuestionDetailPage, QuestionsPage } from "@/features/questions/pages"
 import { ScheduledEventsPage } from "@/features/scheduled/pages"
 import { SearchPage } from "@/features/search/pages"
 import { AppShell } from "@/features/shell"
@@ -59,6 +60,8 @@ export function AppRoutes() {
             <Route path="users" element={<UsersPage />} />
             <Route path="audit" element={<AuditPage />} />
             <Route path="media" element={<MediaPage />} />
+            <Route path="questions" element={<QuestionsPage />} />
+            <Route path="questions/:questionId" element={<QuestionDetailPage />} />
           </Route>
         </Route>
 

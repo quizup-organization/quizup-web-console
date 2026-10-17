@@ -7,6 +7,7 @@ import {
   Inbox,
   LayoutList,
   LogOut,
+  MessageSquareWarning,
   MessagesSquare,
   ScrollText,
   Search,
@@ -19,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { redirectToLogout, useSessionProfile } from "@/features/auth"
+import { useQuestionSummary } from "@/features/questions"
 import { cn } from "@/lib/utils"
 
 interface NavItem {
@@ -37,12 +39,15 @@ const NAV: NavItem[] = [
   { to: "/search", label: "Recherche", icon: Search },
   { to: "/dlq", label: "Dead Letters", icon: Inbox },
   { to: "/media", label: "Médias", icon: Images },
+  { to: "/questions", label: "Questions", icon: MessageSquareWarning },
   { to: "/users", label: "Utilisateurs", icon: Users },
   { to: "/audit", label: "Audit", icon: ScrollText },
 ]
 
 export function AppShell() {
   const profile = useSessionProfile()
+  const questionSummary = useQuestionSummary()
+  const openReports = questionSummary.data?.openReports ?? 0
 
   return (
     <div className="flex min-h-dvh bg-muted/20">
@@ -69,6 +74,11 @@ export function AppShell() {
             >
               <item.icon className="size-4" aria-hidden />
               {item.label}
+              {item.to === "/questions" && openReports > 0 ? (
+                <span className="ml-auto rounded-full bg-destructive px-1.5 py-0.5 text-2xs text-white">
+                  {openReports}
+                </span>
+              ) : null}
             </NavLink>
           ))}
         </nav>
@@ -88,12 +98,15 @@ export function AppShell() {
                 aria-label={item.label}
                 className={({ isActive }) =>
                   cn(
-                    "grid size-9 shrink-0 place-items-center rounded-md",
+                    "relative grid size-9 shrink-0 place-items-center rounded-md",
                     isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
                   )
                 }
               >
                 <item.icon className="size-4" aria-hidden />
+                {item.to === "/questions" && openReports > 0 ? (
+                  <span className="absolute right-1 top-1 size-1.5 rounded-full bg-destructive" />
+                ) : null}
               </NavLink>
             ))}
           </nav>
