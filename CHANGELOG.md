@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.5.0...v1.6.0) (2026-10-17)
+
+### Features
+
+* **console:** ajoute l'administration des questions et signalements ([00d62c7](https://github.com/quizup-organization/quizup-web-console/commit/00d62c7074c636a1ba60a11384105e83ee829594))
+
 ## [1.5.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.4.0...v1.5.0) (2026-10-13)
 
 ### Features
