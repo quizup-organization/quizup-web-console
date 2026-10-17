@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/quizup-organization/quizup-web-console/compare/v1.6.0...v1.6.1) (2026-10-17)
+
+### Bug Fixes
+
+* **console:** retire le découpage manuel des chunks ([6a7f060](https://github.com/quizup-organization/quizup-web-console/commit/6a7f060897954d9b10ee7b577ede1b0cc048fa25))
+
 ## [1.6.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.5.0...v1.6.0) (2026-10-17)
 
 ### Features
