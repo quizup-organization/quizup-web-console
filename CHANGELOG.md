@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.6.1...v1.7.0) (2026-10-18)
+
+### Features
+
+* **console:** add user reports and account moderation ([36a7256](https://github.com/quizup-organization/quizup-web-console/commit/36a72561b5bcfe2bb8b0b6e4a62722a8de328c79))
+
 ## [1.6.1](https://github.com/quizup-organization/quizup-web-console/compare/v1.6.0...v1.6.1) (2026-10-17)
 
 ### Bug Fixes
