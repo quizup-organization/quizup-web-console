@@ -93,6 +93,8 @@ export const queryKeys = {
   },
   userModeration: {
     all: ["user-moderation"] as const,
+    catalogue: (params: unknown) =>
+      ["user-moderation", "catalogue", params] as const,
     queue: (params: unknown) =>
       ["user-moderation", "queue", params] as const,
     summary: () => ["user-moderation", "summary"] as const,

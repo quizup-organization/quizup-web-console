@@ -1,6 +1,6 @@
 /**
  * Chemins des surfaces admin : `quizup-console` (Axon, `ROLE_ADMIN`) et BFF
- * (`/api/admin/media`, `ROLE_ADMIN` — appelé en direct sur `VITE_BFF_URL`).
+ * (`/api/admin/{media,questions,users}`, `ROLE_ADMIN` — appelé en direct sur `VITE_BFF_URL`).
  */
 const segment = (value: string) => encodeURIComponent(value)
 
@@ -51,6 +51,7 @@ export const ENDPOINTS = {
         `/api/admin/questions/${segment(questionId)}/reports/resolve`,
     },
     userModeration: {
+      catalogue: "/api/admin/users",
       queue: "/api/admin/user-reports",
       summary: "/api/admin/user-reports/summary",
       search: "/api/admin/users/search",

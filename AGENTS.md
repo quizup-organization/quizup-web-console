@@ -22,7 +22,7 @@ barrels `index.ts` par feature (imports internes interdits par ESLint).
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `VITE_API_URL` | `http://localhost:8094` | base URL de `quizup-console` |
-| `VITE_BFF_URL` | `http://localhost:8092` | base URL du BFF (surfaces admin média et questions, `ROLE_ADMIN`) |
+| `VITE_BFF_URL` | `http://localhost:8092` | base URL du BFF (surfaces admin média, questions et joueurs, `ROLE_ADMIN`) |
 | `VITE_OIDC_AUTHORITY` | `http://localhost:8085` | issuer `quizup-identity` |
 | `VITE_OIDC_CLIENT_ID` | `console` | client public PKCE (à créer dans identity — Lot D) |
 | `VITE_OIDC_REDIRECT_URI` | `http://localhost:5174/callback` | redirect dev (port Vite 5174) |
@@ -54,12 +54,12 @@ src/
 │   ├── dlq/           # stats par processor + séquences (retry/suppression/purge)
 │   ├── media/         # console média MinIO (objets, orphelins, usage) — API admin du BFF
 │   ├── questions/     # signalements + catalogue questions, modération, upload image
-│   ├── user-moderation/ # signalements joueurs, suspension/réactivation, recherche admin
+│   ├── user-moderation/ # catalogue joueurs, signalements, suspension/réactivation, recherche admin
 │   ├── users/         # admin OIDC + acteurs d'audit
 │   └── audit/         # journal des actions
 ├── lib/               # api-client, api, config, endpoints, metrics (Prometheus), query-keys, session, format
 ├── routes/            # AppRoutes (lazy pages, AdminGate + AppShell)
-├── shared/            # DataState, Modal, PageHeader, StatCard, TimeSeriesChart (recharts), RangeSelector, JsonViewer
+├── shared/            # DataState, Modal, PageHeader, Pagination, SegmentedTabs, StatCard, TimeSeriesChart (recharts), RangeSelector, JsonViewer
 └── components/ui/     # primitives shadcn (button, card, badge, input, label, separator, skeleton)
 ```
 
@@ -75,13 +75,16 @@ d'image via `POST /api/media`, l'approbation/rejet, la suspension/réactivation,
 restauration et la résolution unitaire ou en masse des signalements. Le badge de navigation
 compte les signalements ouverts (`/api/admin/question-reports/summary`, polling 60 s).
 
-**Signalements joueurs** : `/user-reports` expose la file groupée par joueur (statut, compte
-suspendu, tri), une recherche admin (pseudonyme/email/ID) et le badge de navigation des
-signalements ouverts. `/user-reports/:userId` affiche le compte, le profil et les signalements ;
-l'admin peut suspendre (motif, durée 24 h/7 j/30 j/personnalisée/définitive, note **interne**,
-clôture des signalements ouverts) ou réactiver. Le statut de compte est la source de vérité
-de `quizup-identity` ; le BFF applique la suspension (API, sessions, refresh) et expose le badge
-public sur les vues joueur.
+**Joueurs** : l'entrée de navigation « Joueurs » (`/user-reports`) expose deux onglets —
+**Signalements** (file groupée par joueur avec filtres statut/compte/tri et recherche admin
+pseudonyme/email/ID) et **Catalogue** (tous les joueurs, recherche pseudonyme/email/identifiant,
+filtres compte actif/suspendu et signalés, pagination). Le badge de navigation compte les
+signalements ouverts. Catalogue et file consomment `GET /api/admin/users` et
+`GET /api/admin/user-reports` du BFF (`ROLE_ADMIN`). `/user-reports/:userId` affiche le compte,
+le profil et les signalements ; l'admin peut suspendre (motif, durée 24 h/7 j/30 j/personnalisée/
+définitive, note **interne**, clôture des signalements ouverts) ou réactiver. Le statut de compte
+est la source de vérité de `quizup-identity` ; le BFF applique la suspension (API, sessions,
+refresh) et expose le badge public sur les vues joueur.
 
 **Médias** : la page `/media` consomme la surface admin du **BFF** (`/api/admin/media/**`,
 `ROLE_ADMIN`) via un **second client HTTP** (`src/lib/bff-api.ts`, base `VITE_BFF_URL`) : listing du

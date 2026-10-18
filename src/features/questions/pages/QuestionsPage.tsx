@@ -18,6 +18,8 @@ import { EmptyState, ErrorState, LoadingState } from "@/shared/components/DataSt
 import { FilterBar, FilterField } from "@/shared/components/FilterBar"
 import { Modal } from "@/shared/components/Modal"
 import { PageHeader } from "@/shared/components/PageHeader"
+import { Pagination } from "@/shared/components/Pagination"
+import { SegmentedTab, SegmentedTabs } from "@/shared/components/SegmentedTabs"
 import { StatCard } from "@/shared/components/StatCard"
 import {
   useCreateQuestion,
@@ -83,44 +85,23 @@ export function QuestionsPage() {
         />
       </div>
 
-      <div className="inline-flex h-9 items-center rounded-md border border-border p-0.5">
-        <TabButton active={tab === "reports"} onClick={() => setTab("reports")}>
+      <SegmentedTabs>
+        <SegmentedTab
+          active={tab === "reports"}
+          onClick={() => setTab("reports")}
+        >
           Signalements
-        </TabButton>
-        <TabButton
+        </SegmentedTab>
+        <SegmentedTab
           active={tab === "catalogue"}
           onClick={() => setTab("catalogue")}
         >
           Catalogue
-        </TabButton>
-      </div>
+        </SegmentedTab>
+      </SegmentedTabs>
 
       {tab === "reports" ? <ReportedQuestionsTab /> : <QuestionCatalogueTab />}
     </section>
-  )
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean
-  onClick: () => void
-  children: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`h-8 rounded px-3 text-xs transition-colors ${
-        active
-          ? "bg-accent text-accent-foreground"
-          : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      {children}
-    </button>
   )
 }
 
@@ -582,41 +563,6 @@ function StatusBadge({ status }: { status: QuestionStatus }) {
           ? "Rejetée"
           : "En attente"}
     </Badge>
-  )
-}
-
-function Pagination({
-  page,
-  totalPages,
-  onPage,
-}: {
-  page: number
-  totalPages: number
-  onPage: (page: number) => void
-}) {
-  if (totalPages <= 1) return null
-  return (
-    <div className="flex items-center justify-end gap-2 text-sm">
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={page <= 0}
-        onClick={() => onPage(page - 1)}
-      >
-        Précédent
-      </Button>
-      <span className="text-muted-foreground">
-        Page {page + 1} / {totalPages}
-      </span>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={page >= totalPages - 1}
-        onClick={() => onPage(page + 1)}
-      >
-        Suivant
-      </Button>
-    </div>
   )
 }
 

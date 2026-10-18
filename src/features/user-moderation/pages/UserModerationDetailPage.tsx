@@ -76,7 +76,7 @@ export function UserModerationDetailPage() {
 
       <PageHeader
         title={name}
-        description={`Dossier de modération · ${account.email}`}
+        description={`Dossier joueur · ${account.email}`}
         actions={
           <div className="flex gap-2">
             {account.suspended ? (

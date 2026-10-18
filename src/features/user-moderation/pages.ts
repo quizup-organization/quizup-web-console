@@ -1,8 +1,8 @@
 import { lazy } from "react"
 
-export const UserReportsPage = lazy(() =>
-  import("./pages/UserReportsPage").then((module) => ({
-    default: module.UserReportsPage,
+export const PlayersPage = lazy(() =>
+  import("./pages/PlayersPage").then((module) => ({
+    default: module.PlayersPage,
   })),
 )
 

@@ -6,6 +6,7 @@ import {
   userModerationService,
   type ResolveUserReportsInput,
   type SuspendUserInput,
+  type UserCatalogueParams,
   type UserReportQueueParams,
 } from "../lib/user-moderation"
 
@@ -14,6 +15,13 @@ export function useUserModerationSummary() {
     queryKey: queryKeys.userModeration.summary(),
     queryFn: () => userModerationService.summary(),
     refetchInterval: 60_000,
+  })
+}
+
+export function useUserCatalogue(params: UserCatalogueParams) {
+  return useQuery({
+    queryKey: queryKeys.userModeration.catalogue(params),
+    queryFn: () => userModerationService.catalogue(params),
   })
 }
 

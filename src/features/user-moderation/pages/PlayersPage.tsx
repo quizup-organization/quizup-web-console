@@ -20,32 +20,38 @@ import {
 } from "@/shared/components/DataState"
 import { FilterBar, FilterField } from "@/shared/components/FilterBar"
 import { PageHeader } from "@/shared/components/PageHeader"
+import { Pagination } from "@/shared/components/Pagination"
+import { SegmentedTab, SegmentedTabs } from "@/shared/components/SegmentedTabs"
 import { StatCard } from "@/shared/components/StatCard"
 import {
   useReportedUserQueue,
+  useUserCatalogue,
   useUserModerationSearch,
   useUserModerationSummary,
 } from "../hooks/useUserModeration"
 import type {
+  AccountStatus,
   AdminReportedUserSummaryView,
+  AdminUserCatalogueView,
   AdminUserSearchResultView,
   UserReportSort,
   UserReportStatus,
 } from "../lib/user-moderation"
 
+type Tab = "reports" | "catalogue"
+
 const ALL = "__all__"
 const PAGE_SIZE = 20
 
-export function UserReportsPage() {
+export function PlayersPage() {
+  const [tab, setTab] = useState<Tab>("reports")
   const summary = useUserModerationSummary()
-  const [search, setSearch] = useState("")
-  const searchQuery = useUserModerationSearch(search)
 
   return (
     <section className="space-y-4">
       <PageHeader
-        title="Signalements joueurs"
-        description="File de modération des comptes : signalements, suspension temporaire ou définitive, réactivation."
+        title="Joueurs"
+        description="Catalogue des joueurs, signalements et modération des comptes : suspension temporaire ou définitive, réactivation."
         actions={
           <Button
             variant="outline"
@@ -75,6 +81,32 @@ export function UserReportsPage() {
         />
       </div>
 
+      <SegmentedTabs>
+        <SegmentedTab
+          active={tab === "reports"}
+          onClick={() => setTab("reports")}
+        >
+          Signalements
+        </SegmentedTab>
+        <SegmentedTab
+          active={tab === "catalogue"}
+          onClick={() => setTab("catalogue")}
+        >
+          Catalogue
+        </SegmentedTab>
+      </SegmentedTabs>
+
+      {tab === "reports" ? <ReportedUsersTab /> : <UserCatalogueTab />}
+    </section>
+  )
+}
+
+function ReportedUsersTab() {
+  const [search, setSearch] = useState("")
+  const searchQuery = useUserModerationSearch(search)
+
+  return (
+    <div className="space-y-3">
       <div className="space-y-2 rounded-lg border border-border bg-background p-3">
         <div className="flex items-center gap-2">
           <Search className="size-4 text-muted-foreground" aria-hidden />
@@ -89,9 +121,7 @@ export function UserReportsPage() {
           searchQuery.isLoading ? (
             <p className="text-xs text-muted-foreground">Recherche…</p>
           ) : searchQuery.isError ? (
-            <p className="text-xs text-destructive">
-              Recherche indisponible.
-            </p>
+            <p className="text-xs text-destructive">Recherche indisponible.</p>
           ) : searchQuery.data && searchQuery.data.length > 0 ? (
             <ul className="divide-y divide-border rounded-md border border-border">
               {searchQuery.data.map((result) => (
@@ -105,7 +135,176 @@ export function UserReportsPage() {
       </div>
 
       <ReportedUsersQueue />
-    </section>
+    </div>
+  )
+}
+
+function UserCatalogueTab() {
+  const [search, setSearch] = useState("")
+  const [query, setQuery] = useState("")
+  const [status, setStatus] = useState(ALL)
+  const [reportedOnly, setReportedOnly] = useState(ALL)
+  const [page, setPage] = useState(0)
+  const catalogue = useUserCatalogue({
+    q: query || undefined,
+    status: status === ALL ? undefined : (status as AccountStatus),
+    reportedOnly: reportedOnly === "true",
+    page,
+    size: PAGE_SIZE,
+  })
+
+  return (
+    <div className="space-y-3">
+      <FilterBar>
+        <FilterField label="Recherche" className="min-w-[240px] flex-1">
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(event) => {
+              event.preventDefault()
+              setQuery(search.trim())
+              setPage(0)
+            }}
+          >
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Pseudonyme, email ou identifiant…"
+            />
+            <Button type="submit" variant="outline" size="sm">
+              Filtrer
+            </Button>
+          </form>
+        </FilterField>
+        <FilterField label="Compte">
+          <Select
+            value={status}
+            onValueChange={(value) => {
+              setStatus(value ?? ALL)
+              setPage(0)
+            }}
+          >
+            <SelectTrigger className="w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Tous</SelectItem>
+              <SelectItem value="ACTIVE">Actifs</SelectItem>
+              <SelectItem value="SUSPENDED">Suspendus</SelectItem>
+            </SelectContent>
+          </Select>
+        </FilterField>
+        <FilterField label="Signalements">
+          <Select
+            value={reportedOnly}
+            onValueChange={(value) => {
+              setReportedOnly(value ?? ALL)
+              setPage(0)
+            }}
+          >
+            <SelectTrigger className="w-[170px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Tous</SelectItem>
+              <SelectItem value="true">Signalés</SelectItem>
+            </SelectContent>
+          </Select>
+        </FilterField>
+      </FilterBar>
+
+      {catalogue.isPending ? (
+        <LoadingState rows={6} />
+      ) : catalogue.isError ? (
+        <ErrorState
+          error={catalogue.error}
+          onRetry={() => void catalogue.refetch()}
+        />
+      ) : !catalogue.data || catalogue.data.content.length === 0 ? (
+        <EmptyState
+          title="Aucun joueur"
+          description="Aucun joueur ne correspond aux filtres."
+        />
+      ) : (
+        <>
+          <div className="overflow-x-auto rounded-lg border border-border bg-background">
+            <table className="w-full min-w-[980px] text-sm">
+              <thead className="bg-muted/50 text-left text-xs tracking-wide text-muted-foreground uppercase">
+                <tr>
+                  <th className="px-4 py-2 font-medium">Joueur</th>
+                  <th className="px-4 py-2 font-medium">Email</th>
+                  <th className="px-4 py-2 font-medium">Compte</th>
+                  <th className="px-4 py-2 font-medium">Signalements</th>
+                  <th className="px-4 py-2 font-medium">Dernier</th>
+                  <th className="px-4 py-2 font-medium">Inscrit le</th>
+                  <th className="px-4 py-2" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {catalogue.data.content.map((user) => (
+                  <UserCatalogueRow key={user.userId} user={user} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Pagination
+            page={catalogue.data.page}
+            totalPages={catalogue.data.totalPages}
+            onPage={setPage}
+          />
+        </>
+      )}
+    </div>
+  )
+}
+
+function UserCatalogueRow({ user }: { user: AdminUserCatalogueView }) {
+  return (
+    <tr>
+      <td className="px-4 py-2">
+        <div className="flex items-center gap-2">
+          <Initials name={user.pseudonym ?? user.email} />
+          <span className="font-medium">
+            {user.pseudonym ?? "Sans pseudonyme"}
+          </span>
+          {user.protectedAccount ? (
+            <Badge variant="outline">Protégé</Badge>
+          ) : null}
+        </div>
+      </td>
+      <td className="px-4 py-2 text-muted-foreground">{user.email}</td>
+      <td className="px-4 py-2">
+        <UserStatusBadge
+          suspended={user.suspended}
+          until={user.suspendedUntil}
+        />
+      </td>
+      <td className="px-4 py-2 whitespace-nowrap">
+        {user.totalReportCount === 0 ? (
+          <span className="text-muted-foreground">—</span>
+        ) : (
+          <Badge variant="outline">
+            <Flag className="size-3" />
+            {user.openReportCount} ouvert(s) / {user.totalReportCount}
+          </Badge>
+        )}
+      </td>
+      <td className="px-4 py-2 whitespace-nowrap text-muted-foreground">
+        {user.lastReportedAt ? formatDateTime(user.lastReportedAt) : "—"}
+      </td>
+      <td className="px-4 py-2 whitespace-nowrap text-muted-foreground">
+        {formatDateTime(user.createdAt)}
+      </td>
+      <td className="px-4 py-2 text-right">
+        <Button
+          size="sm"
+          variant="outline"
+          nativeButton={false}
+          render={<Link to={`/user-reports/${user.userId}`} />}
+        >
+          Ouvrir
+        </Button>
+      </td>
+    </tr>
   )
 }
 
@@ -120,7 +319,10 @@ function SearchResultRow({ result }: { result: AdminUserSearchResultView }) {
         </p>
         <p className="truncate text-xs text-muted-foreground">{result.email}</p>
       </div>
-      <UserStatusBadge suspended={result.suspended} />
+      <UserStatusBadge
+        suspended={result.suspended}
+        until={result.suspendedUntil}
+      />
       {result.protectedAccount ? (
         <Badge variant="outline">Protégé</Badge>
       ) : (
@@ -238,30 +440,11 @@ function ReportedUsersQueue() {
               </tbody>
             </table>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              Page {queue.data.page + 1} /{" "}
-              {Math.max(queue.data.totalPages, 1)}
-            </span>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={queue.data.first}
-                onClick={() => setPage((current) => Math.max(0, current - 1))}
-              >
-                Précédent
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={queue.data.last}
-                onClick={() => setPage((current) => current + 1)}
-              >
-                Suivant
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            page={queue.data.page}
+            totalPages={queue.data.totalPages}
+            onPage={setPage}
+          />
         </>
       )}
     </div>

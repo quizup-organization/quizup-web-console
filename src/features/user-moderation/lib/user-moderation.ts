@@ -98,6 +98,21 @@ export interface AdminUserSearchResultView {
   protectedAccount: boolean
 }
 
+export interface AdminUserCatalogueView {
+  userId: string
+  email: string
+  pseudonym: string | null
+  avatarOptions: string | null
+  status: AccountStatus
+  suspended: boolean
+  suspendedUntil: string | null
+  createdAt: string
+  protectedAccount: boolean
+  openReportCount: number
+  totalReportCount: number
+  lastReportedAt: string | null
+}
+
 export interface AdminUserModerationSummaryView {
   openReports: number
   reportedUsers: number
@@ -117,6 +132,14 @@ export interface UserReportQueueParams {
   status?: UserReportStatus
   suspended?: boolean
   sort?: UserReportSort
+  page?: number
+  size?: number
+}
+
+export interface UserCatalogueParams {
+  q?: string
+  status?: AccountStatus
+  reportedOnly?: boolean
   page?: number
   size?: number
 }
@@ -147,6 +170,18 @@ export const USER_SUSPENSION_REASON_LABELS: Record<
 }
 
 export const userModerationService = {
+  catalogue: (
+    params: UserCatalogueParams,
+  ): Promise<Page<AdminUserCatalogueView>> =>
+    bffApi.get<Page<AdminUserCatalogueView>>(
+      ENDPOINTS.bff.userModeration.catalogue,
+      {
+        params: { ...params } as Record<
+          string,
+          string | number | boolean | undefined
+        >,
+      },
+    ),
   queue: (
     params: UserReportQueueParams,
   ): Promise<Page<AdminReportedUserSummaryView>> =>

@@ -12,9 +12,9 @@ import {
   ScrollText,
   Search,
   ServerCog,
-  ShieldAlert,
   Terminal,
   Users,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react"
 
@@ -42,7 +42,7 @@ const NAV: NavItem[] = [
   { to: "/dlq", label: "Dead Letters", icon: Inbox },
   { to: "/media", label: "Médias", icon: Images },
   { to: "/questions", label: "Questions", icon: MessageSquareWarning },
-  { to: "/user-reports", label: "Signalements joueurs", icon: ShieldAlert },
+  { to: "/user-reports", label: "Joueurs", icon: UsersRound },
   { to: "/users", label: "Utilisateurs", icon: Users },
   { to: "/audit", label: "Audit", icon: ScrollText },
 ]
