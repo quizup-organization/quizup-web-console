@@ -44,7 +44,7 @@ barrels `index.ts` par feature (imports internes interdits par ESLint).
 src/
 ├── features/
 │   ├── auth/          # oidc, session store, AdminGate, pages login/callback
-│   ├── shell/         # AppShell (sidebar + topbar + Outlet)
+│   ├── shell/         # AppShell (sidebar + topbar + versions web console / quizup-console + Outlet)
 │   ├── dashboard/     # tableau de bord (compteurs, débits, event stores)
 │   ├── applications/  # réplicas + détail application (instances, handlers, processors)
 │   ├── processors/    # liste + détail (segments, actions, charts métriques)

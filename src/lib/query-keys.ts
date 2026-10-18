@@ -4,6 +4,7 @@
 export const queryKeys = {
   dashboard: {
     all: ["console", "dashboard"] as const,
+    version: () => ["console", "dashboard", "version"] as const,
   },
   applications: {
     all: ["console", "applications"] as const,

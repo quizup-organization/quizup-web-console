@@ -67,6 +67,7 @@ export const ENDPOINTS = {
     },
   },
   console: {
+    version: "/api/console/version",
     dashboard: "/api/console/dashboard",
     applications: "/api/console/applications",
     application: (application: string) =>

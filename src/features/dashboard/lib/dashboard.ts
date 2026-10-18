@@ -2,6 +2,11 @@ import { api } from "@/lib/api"
 import { ENDPOINTS } from "@/lib/endpoints"
 import type { PrometheusResult } from "@/lib/metrics"
 
+export interface ConsoleVersionView {
+  name: string
+  version: string
+}
+
 export interface DashboardResponse {
   product: { name: string; version: string }
   counts: {
@@ -40,4 +45,9 @@ export interface DashboardResponse {
 export const dashboardService = {
   get: (): Promise<DashboardResponse> =>
     api.get<DashboardResponse>(ENDPOINTS.console.dashboard),
+}
+
+export const consoleVersionService = {
+  get: (): Promise<ConsoleVersionView> =>
+    api.get<ConsoleVersionView>(ENDPOINTS.console.version),
 }

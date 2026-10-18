@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { redirectToLogout, useSessionProfile } from "@/features/auth"
+import { useConsoleVersion } from "@/features/dashboard"
 import { useQuestionSummary } from "@/features/questions"
 import { useUserModerationSummary } from "@/features/user-moderation"
 import { cn } from "@/lib/utils"
@@ -49,6 +50,7 @@ const NAV: NavItem[] = [
 
 export function AppShell() {
   const profile = useSessionProfile()
+  const consoleVersion = useConsoleVersion()
   const questionSummary = useQuestionSummary()
   const userModerationSummary = useUserModerationSummary()
   const openReports = questionSummary.data?.openReports ?? 0
@@ -93,7 +95,8 @@ export function AppShell() {
           ))}
         </nav>
         <div className="border-t border-border p-3 text-xs text-muted-foreground">
-          Axon Framework 4.13 · admin
+          quizup-web-console {__APP_VERSION__} · quizup-console{" "}
+          {consoleVersion.data?.version ?? "—"}
         </div>
       </aside>
 

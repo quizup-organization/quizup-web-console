@@ -1,2 +1,2 @@
-export { useDashboard } from "./hooks/useDashboard"
-export type { DashboardResponse } from "./lib/dashboard"
+export { useConsoleVersion, useDashboard } from "./hooks/useDashboard"
+export type { ConsoleVersionView, DashboardResponse } from "./lib/dashboard"
