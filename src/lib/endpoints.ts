@@ -50,6 +50,20 @@ export const ENDPOINTS = {
       resolveReports: (questionId: string) =>
         `/api/admin/questions/${segment(questionId)}/reports/resolve`,
     },
+    userModeration: {
+      queue: "/api/admin/user-reports",
+      summary: "/api/admin/user-reports/summary",
+      search: "/api/admin/users/search",
+      detail: (userId: string) => `/api/admin/users/${segment(userId)}`,
+      suspend: (userId: string) =>
+        `/api/admin/users/${segment(userId)}/suspend`,
+      reinstate: (userId: string) =>
+        `/api/admin/users/${segment(userId)}/reinstate`,
+      resolveReport: (reportId: string) =>
+        `/api/admin/user-reports/${segment(reportId)}/resolve`,
+      resolveReports: (userId: string) =>
+        `/api/admin/users/${segment(userId)}/reports/resolve`,
+    },
   },
   console: {
     dashboard: "/api/console/dashboard",

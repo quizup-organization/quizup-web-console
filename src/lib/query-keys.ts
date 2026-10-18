@@ -91,4 +91,14 @@ export const queryKeys = {
     detail: (questionId: string) =>
       ["questions", "detail", questionId] as const,
   },
+  userModeration: {
+    all: ["user-moderation"] as const,
+    queue: (params: unknown) =>
+      ["user-moderation", "queue", params] as const,
+    summary: () => ["user-moderation", "summary"] as const,
+    search: (query: string) =>
+      ["user-moderation", "search", query] as const,
+    detail: (userId: string) =>
+      ["user-moderation", "detail", userId] as const,
+  },
 } as const

@@ -54,6 +54,7 @@ src/
 │   ├── dlq/           # stats par processor + séquences (retry/suppression/purge)
 │   ├── media/         # console média MinIO (objets, orphelins, usage) — API admin du BFF
 │   ├── questions/     # signalements + catalogue questions, modération, upload image
+│   ├── user-moderation/ # signalements joueurs, suspension/réactivation, recherche admin
 │   ├── users/         # admin OIDC + acteurs d'audit
 │   └── audit/         # journal des actions
 ├── lib/               # api-client, api, config, endpoints, metrics (Prometheus), query-keys, session, format
@@ -64,8 +65,8 @@ src/
 
 Routes : `/login`, `/callback`, `/silent-callback`, puis sous garde admin `/` (Dashboard),
 `/applications`, `/applications/:application`, `/processors` (+ détail), `/commands`, `/queries`,
-`/scheduled-events`, `/search`, `/dlq` (+ détail), `/media`, `/questions` (+ détail), `/users`,
-`/audit`.
+`/scheduled-events`, `/search`, `/dlq` (+ détail), `/media`, `/questions` (+ détail),
+`/user-reports` (+ détail), `/users`, `/audit`.
 
 **Questions** : `/questions` expose deux onglets — **Signalements** (file groupée par question,
 filtres statut/sujet/suspension/tri) et **Catalogue** (recherche, sujet, statut, difficulté,
@@ -73,6 +74,14 @@ modération, signalées uniquement, création). `/questions/:id` permet l'éditi
 d'image via `POST /api/media`, l'approbation/rejet, la suspension/réactivation, l'archivage/
 restauration et la résolution unitaire ou en masse des signalements. Le badge de navigation
 compte les signalements ouverts (`/api/admin/question-reports/summary`, polling 60 s).
+
+**Signalements joueurs** : `/user-reports` expose la file groupée par joueur (statut, compte
+suspendu, tri), une recherche admin (pseudonyme/email/ID) et le badge de navigation des
+signalements ouverts. `/user-reports/:userId` affiche le compte, le profil et les signalements ;
+l'admin peut suspendre (motif, durée 24 h/7 j/30 j/personnalisée/définitive, note **interne**,
+clôture des signalements ouverts) ou réactiver. Le statut de compte est la source de vérité
+de `quizup-identity` ; le BFF applique la suspension (API, sessions, refresh) et expose le badge
+public sur les vues joueur.
 
 **Médias** : la page `/media` consomme la surface admin du **BFF** (`/api/admin/media/**`,
 `ROLE_ADMIN`) via un **second client HTTP** (`src/lib/bff-api.ts`, base `VITE_BFF_URL`) : listing du

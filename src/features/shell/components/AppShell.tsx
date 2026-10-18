@@ -12,6 +12,7 @@ import {
   ScrollText,
   Search,
   ServerCog,
+  ShieldAlert,
   Terminal,
   Users,
   type LucideIcon,
@@ -21,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { redirectToLogout, useSessionProfile } from "@/features/auth"
 import { useQuestionSummary } from "@/features/questions"
+import { useUserModerationSummary } from "@/features/user-moderation"
 import { cn } from "@/lib/utils"
 
 interface NavItem {
@@ -40,6 +42,7 @@ const NAV: NavItem[] = [
   { to: "/dlq", label: "Dead Letters", icon: Inbox },
   { to: "/media", label: "Médias", icon: Images },
   { to: "/questions", label: "Questions", icon: MessageSquareWarning },
+  { to: "/user-reports", label: "Signalements joueurs", icon: ShieldAlert },
   { to: "/users", label: "Utilisateurs", icon: Users },
   { to: "/audit", label: "Audit", icon: ScrollText },
 ]
@@ -47,7 +50,9 @@ const NAV: NavItem[] = [
 export function AppShell() {
   const profile = useSessionProfile()
   const questionSummary = useQuestionSummary()
+  const userModerationSummary = useUserModerationSummary()
   const openReports = questionSummary.data?.openReports ?? 0
+  const openUserReports = userModerationSummary.data?.openReports ?? 0
 
   return (
     <div className="flex min-h-dvh bg-muted/20">
@@ -79,6 +84,11 @@ export function AppShell() {
                   {openReports}
                 </span>
               ) : null}
+              {item.to === "/user-reports" && openUserReports > 0 ? (
+                <span className="ml-auto rounded-full bg-destructive px-1.5 py-0.5 text-2xs text-white">
+                  {openUserReports}
+                </span>
+              ) : null}
             </NavLink>
           ))}
         </nav>
@@ -105,6 +115,9 @@ export function AppShell() {
               >
                 <item.icon className="size-4" aria-hidden />
                 {item.to === "/questions" && openReports > 0 ? (
+                  <span className="absolute right-1 top-1 size-1.5 rounded-full bg-destructive" />
+                ) : null}
+                {item.to === "/user-reports" && openUserReports > 0 ? (
                   <span className="absolute right-1 top-1 size-1.5 rounded-full bg-destructive" />
                 ) : null}
               </NavLink>
