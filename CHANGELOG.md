@@ -1,3 +1,9 @@
+## [1.9.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.8.0...v1.9.0) (2026-10-18)
+
+### Features
+
+* **console:** show web and service versions in the shell ([da2cd17](https://github.com/quizup-organization/quizup-web-console/commit/da2cd17247cf8a290aa4bc55f1fdccc32d32babb))
+
 ## [1.8.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.7.0...v1.8.0) (2026-10-18)
 
 ### Features
