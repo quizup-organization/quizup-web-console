@@ -4,7 +4,7 @@ import type { Page } from "@/shared/types/api"
 
 export type AccountStatus = "ACTIVE" | "SUSPENDED"
 
-export type UserSuspensionReason =
+export type UserReportReason =
   | "HARASSMENT"
   | "HATE_SPEECH"
   | "INAPPROPRIATE_CONTENT"
@@ -12,7 +12,17 @@ export type UserSuspensionReason =
   | "SPAM"
   | "OTHER"
 
-export type UserReportReason = UserSuspensionReason
+export type UserSuspensionReason =
+  | UserReportReason
+  | "THREATS"
+  | "IMPERSONATION"
+  | "PRIVACY_VIOLATION"
+  | "COPYRIGHT"
+  | "EXPLOIT_ABUSE"
+  | "MULTIPLE_ACCOUNTS"
+  | "TERMS_VIOLATION"
+  | "MINOR_SAFETY"
+  | "FRAUD"
 
 export type UserReportStatus = "OPEN" | "RESOLVED" | "DISMISSED"
 export type UserReportResolution = "RESOLVED" | "DISMISSED"
@@ -157,16 +167,29 @@ export interface SuspendUserInput {
   resolveOpenReports: boolean
 }
 
-export const USER_SUSPENSION_REASON_LABELS: Record<
-  UserSuspensionReason,
-  string
-> = {
+export const USER_REPORT_REASON_LABELS: Record<UserReportReason, string> = {
   HARASSMENT: "Harcèlement",
   HATE_SPEECH: "Discours haineux",
   INAPPROPRIATE_CONTENT: "Contenu inapproprié",
   CHEATING: "Triche",
   SPAM: "Spam",
   OTHER: "Autre",
+}
+
+export const USER_SUSPENSION_REASON_LABELS: Record<
+  UserSuspensionReason,
+  string
+> = {
+  ...USER_REPORT_REASON_LABELS,
+  THREATS: "Menaces ou violence",
+  IMPERSONATION: "Usurpation d'identité",
+  PRIVACY_VIOLATION: "Atteinte à la vie privée",
+  COPYRIGHT: "Atteinte au droit d'auteur",
+  EXPLOIT_ABUSE: "Exploitation de faille",
+  MULTIPLE_ACCOUNTS: "Comptes multiples / contournement",
+  TERMS_VIOLATION: "Violation des conditions d'utilisation",
+  MINOR_SAFETY: "Mise en danger de mineurs",
+  FRAUD: "Fraude ou arnaque",
 }
 
 export const userModerationService = {

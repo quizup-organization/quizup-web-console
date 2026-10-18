@@ -81,7 +81,8 @@ pseudonyme/email/ID) et **Catalogue** (tous les joueurs, recherche pseudonyme/em
 filtres compte actif/suspendu et signalés, pagination). Le badge de navigation compte les
 signalements ouverts. Catalogue et file consomment `GET /api/admin/users` et
 `GET /api/admin/user-reports` du BFF (`ROLE_ADMIN`). `/user-reports/:userId` affiche le compte,
-le profil et les signalements ; l'admin peut suspendre (motif, durée 24 h/7 j/30 j/personnalisée/
+le profil et les signalements ; l'admin peut suspendre (motifs groupés — comportement, contenu,
+intégrité du jeu, plateforme —, durée de 1 h à 1 an, personnalisée en heures/jours/semaines/mois ou
 définitive, note **interne**, clôture des signalements ouverts) ou réactiver. Le statut de compte
 est la source de vérité de `quizup-identity` ; le BFF applique la suspension (API, sessions,
 refresh) et expose le badge public sur les vues joueur.

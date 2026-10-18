@@ -15,7 +15,9 @@ import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -35,6 +37,7 @@ import {
   useUserModerationDetail,
 } from "../hooks/useUserModeration"
 import {
+  USER_REPORT_REASON_LABELS,
   USER_SUSPENSION_REASON_LABELS,
   type AdminUserReportView,
   type UserReportResolution,
@@ -181,11 +184,13 @@ export function UserModerationDetailPage() {
         />
       </div>
 
-      <SuspendUserModal
-        userId={userId}
-        open={suspendOpen}
-        onClose={() => setSuspendOpen(false)}
-      />
+      {suspendOpen ? (
+        <SuspendUserModal
+          userId={userId}
+          open
+          onClose={() => setSuspendOpen(false)}
+        />
+      ) : null}
       <ReinstateUserModal
         userId={userId}
         open={reinstateOpen}
@@ -283,7 +288,7 @@ function ReportCard({
       <div className="flex flex-wrap items-center gap-2">
         {report.reasons.map((reason) => (
           <Badge key={reason} variant="secondary">
-            {USER_SUSPENSION_REASON_LABELS[reason]}
+            {USER_REPORT_REASON_LABELS[reason]}
           </Badge>
         ))}
         <ReportStatusBadge status={report.status} />
@@ -340,6 +345,141 @@ function ReportCard({
   )
 }
 
+type CustomDurationUnit = "hours" | "days" | "weeks" | "months"
+
+const CUSTOM_DURATION_UNITS: Record<
+  CustomDurationUnit,
+  { label: string; max: number; toDays: (value: number) => number }
+> = {
+  hours: { label: "Heures", max: 3650 * 24, toDays: (value) => value / 24 },
+  days: { label: "Jours", max: 3650, toDays: (value) => value },
+  weeks: { label: "Semaines", max: 521, toDays: (value) => value * 7 },
+  months: { label: "Mois (30 j)", max: 121, toDays: (value) => value * 30 },
+}
+
+interface DurationOption {
+  value: string
+  label: string
+  hours?: number
+  days?: number
+}
+
+const SUSPENSION_DURATION_GROUPS: Array<{
+  label: string
+  options: DurationOption[]
+}> = [
+  {
+    label: "Court terme",
+    options: [
+      { value: "PT1H", label: "1 heure", hours: 1 },
+      { value: "PT6H", label: "6 heures", hours: 6 },
+      { value: "P1D", label: "24 heures", days: 1 },
+      { value: "P3D", label: "3 jours", days: 3 },
+    ],
+  },
+  {
+    label: "Moyen terme",
+    options: [
+      { value: "P7D", label: "7 jours", days: 7 },
+      { value: "P14D", label: "14 jours", days: 14 },
+      { value: "P30D", label: "30 jours", days: 30 },
+    ],
+  },
+  {
+    label: "Long terme",
+    options: [
+      { value: "P90D", label: "90 jours", days: 90 },
+      { value: "P180D", label: "6 mois", days: 180 },
+      { value: "P365D", label: "1 an", days: 365 },
+    ],
+  },
+  {
+    label: "Autre",
+    options: [
+      { value: "custom", label: "Personnalisée…" },
+      { value: "permanent", label: "Définitive" },
+    ],
+  },
+]
+
+const SUSPENSION_REASON_GROUPS: Array<{
+  label: string
+  reasons: UserSuspensionReason[]
+}> = [
+  {
+    label: "Comportement",
+    reasons: [
+      "HARASSMENT",
+      "HATE_SPEECH",
+      "THREATS",
+      "IMPERSONATION",
+      "PRIVACY_VIOLATION",
+    ],
+  },
+  {
+    label: "Contenu",
+    reasons: ["INAPPROPRIATE_CONTENT", "SPAM", "COPYRIGHT"],
+  },
+  {
+    label: "Intégrité du jeu",
+    reasons: ["CHEATING", "EXPLOIT_ABUSE", "MULTIPLE_ACCOUNTS"],
+  },
+  {
+    label: "Plateforme",
+    reasons: ["TERMS_VIOLATION", "MINOR_SAFETY", "FRAUD"],
+  },
+  {
+    label: "Autre",
+    reasons: ["OTHER"],
+  },
+]
+
+function customDurationIso(value: number, unit: CustomDurationUnit): string {
+  switch (unit) {
+    case "hours":
+      return `PT${value}H`
+    case "weeks":
+      return `P${value * 7}D`
+    case "months":
+      return `P${value * 30}D`
+    default:
+      return `P${value}D`
+  }
+}
+
+function durationPreview(
+  mode: string,
+  customValue: string,
+  customUnit: CustomDurationUnit,
+): { error?: string; ms?: number; permanent: boolean } {
+  if (mode === "permanent") {
+    return { permanent: true }
+  }
+  if (mode !== "custom") {
+    const option = SUSPENSION_DURATION_GROUPS.flatMap(
+      (group) => group.options,
+    ).find((candidate) => candidate.value === mode)
+    const ms =
+      (option?.hours ?? 0) * 3_600_000 + (option?.days ?? 0) * 86_400_000
+    return { ms, permanent: false }
+  }
+  const value = Number(customValue)
+  if (!Number.isInteger(value) || value < 1) {
+    return {
+      error: "La durée doit être un nombre entier positif.",
+      permanent: false,
+    }
+  }
+  const unit = CUSTOM_DURATION_UNITS[customUnit]
+  if (value > unit.max) {
+    return {
+      error: `Maximum ${unit.max.toLocaleString("fr-FR")} ${unit.label.toLowerCase()}.`,
+      permanent: false,
+    }
+  }
+  return { ms: unit.toDays(value) * 86_400_000, permanent: false }
+}
+
 function SuspendUserModal({
   userId,
   open,
@@ -352,30 +492,39 @@ function SuspendUserModal({
   const suspend = useSuspendUser(userId)
   const [reason, setReason] = useState<UserSuspensionReason>("HARASSMENT")
   const [mode, setMode] = useState("P7D")
-  const [customDays, setCustomDays] = useState("7")
+  const [customValue, setCustomValue] = useState("7")
+  const [customUnit, setCustomUnit] = useState<CustomDurationUnit>("days")
   const [note, setNote] = useState("")
   const [resolveOpenReports, setResolveOpenReports] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [openedAt] = useState(() => Date.now())
 
   const permanent = mode === "permanent"
   const custom = mode === "custom"
+  const customUnitConfig = CUSTOM_DURATION_UNITS[customUnit]
+  const durationInfo = durationPreview(mode, customValue, customUnit)
+  const until =
+    !durationInfo.permanent && durationInfo.ms
+      ? new Date(openedAt + durationInfo.ms).toISOString()
+      : null
 
   const submit = () => {
-    if (custom && (!Number.isInteger(Number(customDays)) || Number(customDays) < 1)) {
-      setError("La durée personnalisée doit être un nombre de jours positif.")
+    if (durationInfo.error) {
+      setError(durationInfo.error)
       return
     }
     setError(null)
+    const duration = permanent
+      ? undefined
+      : custom
+        ? customDurationIso(Number(customValue), customUnit)
+        : mode
     suspend.mutate(
       {
         reason,
         note: note.trim() || undefined,
         permanent,
-        duration: permanent
-          ? undefined
-          : custom
-            ? `P${Number(customDays)}D`
-            : mode,
+        duration,
         resolveOpenReports,
       },
       {
@@ -401,7 +550,7 @@ function SuspendUserModal({
           <Button
             variant="destructive"
             onClick={submit}
-            disabled={suspend.isPending}
+            disabled={suspend.isPending || Boolean(durationInfo.error)}
           >
             {suspend.isPending ? "Suspension…" : "Suspendre"}
           </Button>
@@ -421,13 +570,16 @@ function SuspendUserModal({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(USER_SUSPENSION_REASON_LABELS).map(
-                ([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ),
-              )}
+              {SUSPENSION_REASON_GROUPS.map((group) => (
+                <SelectGroup key={group.label}>
+                  <SelectLabel>{group.label}</SelectLabel>
+                  {group.reasons.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {USER_SUSPENSION_REASON_LABELS[value]}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -442,28 +594,68 @@ function SuspendUserModal({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="P1D">24 heures</SelectItem>
-              <SelectItem value="P7D">7 jours</SelectItem>
-              <SelectItem value="P30D">30 jours</SelectItem>
-              <SelectItem value="custom">Personnalisée (jours)</SelectItem>
-              <SelectItem value="permanent">Définitive</SelectItem>
+              {SUSPENSION_DURATION_GROUPS.map((group) => (
+                <SelectGroup key={group.label}>
+                  <SelectLabel>{group.label}</SelectLabel>
+                  {group.options.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
         {custom ? (
-          <div className="space-y-1">
-            <label className="text-xs text-muted-foreground">
-              Nombre de jours
-            </label>
-            <Input
-              type="number"
-              min={1}
-              max={3650}
-              value={customDays}
-              onChange={(event) => setCustomDays(event.target.value)}
-            />
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-2">
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Valeur</label>
+              <Input
+                type="number"
+                min={1}
+                max={customUnitConfig.max}
+                value={customValue}
+                onChange={(event) => setCustomValue(event.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground">Unité</label>
+              <Select
+                value={customUnit}
+                onValueChange={(value) =>
+                  setCustomUnit((value ?? "days") as CustomDurationUnit)
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(CUSTOM_DURATION_UNITS).map(
+                    ([value, unit]) => (
+                      <SelectItem key={value} value={value}>
+                        {unit.label}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+        ) : null}
+
+        {durationInfo.error ? (
+          <p className="text-xs text-destructive">{durationInfo.error}</p>
+        ) : permanent ? (
+          <p className="rounded-md bg-amber-50 p-2 text-xs text-amber-800">
+            Suspension définitive : elle ne pourra être levée que par une
+            réactivation manuelle.
+          </p>
+        ) : until ? (
+          <p className="text-xs text-muted-foreground">
+            Fin prévue : {formatDateTime(until)}
+          </p>
         ) : null}
 
         <div className="space-y-1">
