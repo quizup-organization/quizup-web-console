@@ -1,3 +1,9 @@
+## [1.10.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.9.0...v1.10.0) (2026-10-18)
+
+### Features
+
+* **console:** enrich account suspension modal ([ad3cd15](https://github.com/quizup-organization/quizup-web-console/commit/ad3cd158abc5a69ef1e4eef9454aea611ef2cd9a))
+
 ## [1.9.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.8.0...v1.9.0) (2026-10-18)
 
 ### Features
