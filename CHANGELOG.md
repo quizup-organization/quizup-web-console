@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.7.0...v1.8.0) (2026-10-18)
+
+### Features
+
+* **console:** add player catalogue and rename user reports ([1324428](https://github.com/quizup-organization/quizup-web-console/commit/1324428ddf48164f8d161d9f92c66f26f3fff713))
+
 ## [1.7.0](https://github.com/quizup-organization/quizup-web-console/compare/v1.6.1...v1.7.0) (2026-10-18)
 
 ### Features
